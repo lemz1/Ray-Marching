@@ -155,25 +155,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\ElementBuffer.cpp" />
-    <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\Quad.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\VertexArray.cpp" />
-    <ClCompile Include="src\VertexBuffer.cpp" />
+    <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Utils\BufferObjects\ElementBuffer.cpp" />
+    <ClCompile Include="src\Core\glad.c" />
+    <ClCompile Include="src\Utils\Input\KeyboardHandler.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Utils\Input\MouseHandler.cpp" />
+    <ClCompile Include="src\Objects\Quad.cpp" />
+    <ClCompile Include="src\Utils\Shader.cpp" />
+    <ClCompile Include="src\Utils\BufferObjects\VertexArray.cpp" />
+    <ClCompile Include="src\Utils\BufferObjects\VertexBuffer.cpp" />
+    <ClCompile Include="src\Core\Window.cpp" />
+    <ClCompile Include="src\Utils\Input\WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ElementBuffer.h" />
-    <ClInclude Include="src\Mesh.h" />
-    <ClInclude Include="src\Quad.h" />
-    <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\VertexArray.h" />
-    <ClInclude Include="src\VertexBuffer.h" />
+    <ClInclude Include="src\Core\Application.h" />
+    <ClInclude Include="src\Utils\BufferObjects\ElementBuffer.h" />
+    <ClInclude Include="src\Utils\Input\KeyboardHandler.h" />
+    <ClInclude Include="src\Utils\Mesh.h" />
+    <ClInclude Include="src\Utils\Input\MouseHandler.h" />
+    <ClInclude Include="src\Objects\Quad.h" />
+    <ClInclude Include="src\Utils\Shader.h" />
+    <ClInclude Include="src\Utils\BufferObjects\VertexArray.h" />
+    <ClInclude Include="src\Utils\BufferObjects\VertexBuffer.h" />
+    <ClInclude Include="src\Core\Window.h" />
+    <ClInclude Include="src\Utils\Input\WindowHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

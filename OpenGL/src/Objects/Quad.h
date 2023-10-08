@@ -1,10 +1,10 @@
 #pragma once
 
-#include "VertexArray.h"
-#include "VertexBuffer.h"
-#include "ElementBuffer.h"
-#include "Mesh.h"
-#include "Shader.h"
+#include "../Utils/BufferObjects/VertexArray.h"
+#include "../Utils/BufferObjects/VertexBuffer.h"
+#include "../Utils/BufferObjects/ElementBuffer.h"
+#include "../Utils/Mesh.h"
+#include "../Utils/Shader.h"
 
 class Quad
 {
