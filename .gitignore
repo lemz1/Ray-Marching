@@ -2,6 +2,8 @@
 bin
 bin-int
 Ray Marching/*.vcxproj
+Ray Marching/*.vcxproj.user
+Ray Marching/*.vcxproj.filters
 Ray Marching.sln
 
 ## Ignore Visual Studio temporary files, build results, and
