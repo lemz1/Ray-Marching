@@ -9,6 +9,7 @@
 class Quad
 {
 public:
+	Quad() = default;
 	Quad(std::shared_ptr<Shader> shader);
 	~Quad();
 

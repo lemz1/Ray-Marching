@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Scenes\RayMarchingScene.cpp" />
     <ClCompile Include="src\Utils\BufferObjects\ElementBuffer.cpp" />
     <ClCompile Include="src\Core\glad.c" />
     <ClCompile Include="src\Utils\Input\KeyboardHandler.cpp" />
@@ -174,6 +175,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Application.h" />
+    <ClInclude Include="src\Core\Scene.h" />
+    <ClInclude Include="src\Scenes\RayMarchingScene.h" />
     <ClInclude Include="src\Utils\BufferObjects\ElementBuffer.h" />
     <ClInclude Include="src\Utils\Input\KeyboardHandler.h" />
     <ClInclude Include="src\Utils\Mesh.h" />

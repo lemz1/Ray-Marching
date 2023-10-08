@@ -13,6 +13,7 @@
     <ClCompile Include="src\Utils\Input\KeyboardHandler.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Scenes\RayMarchingScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
@@ -30,5 +31,7 @@
     <ClInclude Include="src\Utils\Input\KeyboardHandler.h" />
     <ClInclude Include="src\Core\Window.h" />
     <ClInclude Include="src\Core\Application.h" />
+    <ClInclude Include="src\Core\Scene.h" />
+    <ClInclude Include="src\Scenes\RayMarchingScene.h" />
   </ItemGroup>
 </Project>

@@ -7,20 +7,18 @@
 #include <sstream>
 #include <iostream>
 #include <cerrno>
-
-std::string GetFileContents(const char* filename);
+#include <memory>
 
 class Shader
 {
 public:
-	Shader(const char* vertexFile, const char* fragmentFile);
 	~Shader();
 	void StartProgram();
 	void StopProgram();
 
+	static std::shared_ptr<Shader> CreateVertexFragmentShader(const char* vertexFilePath, const char* fragmentFilePath);
+
 	const GLuint GetID() const { return m_ID; }
-private:
-	void compileErrors(GLuint id, const char* type);
 private:
 	GLuint m_ID;
 };

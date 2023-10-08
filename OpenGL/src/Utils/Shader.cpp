@@ -16,56 +16,7 @@ std::string GetFileContents(const char* filePath)
 	throw(errno);
 }
 
-Shader::Shader(const char* vertexFilePath, const char* fragmentFilePath)
-{
-	std::string vertexString = GetFileContents(vertexFilePath);
-	const char* vertexSource = vertexString.c_str();
-
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexSource, NULL);
-
-	glCompileShader(vertexShader);
-	compileErrors(vertexShader, "VERTEX");
-
-
-	std::string fragmentString = GetFileContents(fragmentFilePath);
-	const char* fragmentSource = fragmentString.c_str();
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-	
-	glCompileShader(fragmentShader);
-	compileErrors(fragmentShader, "FRAGMENT");
-
-	
-	m_ID = glCreateProgram();
-
-	glAttachShader(m_ID, vertexShader);
-	glAttachShader(m_ID, fragmentShader);
-
-	glLinkProgram(m_ID);
-	compileErrors(m_ID, "PROGRAM");
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-}
-
-Shader::~Shader()
-{
-	glDeleteProgram(m_ID);
-}
-
-void Shader::StartProgram()
-{
-	glUseProgram(m_ID);
-}
-
-void Shader::StopProgram()
-{
-	glUseProgram(0);
-}
-
-void Shader::compileErrors(GLuint id, const char* type)
+void compileErrors(GLuint id, const char* type)
 {
 	GLint hasCompiled;
 	char infoLog[1024];
@@ -87,4 +38,58 @@ void Shader::compileErrors(GLuint id, const char* type)
 			std::cout << "SHADER LINKING ERROR for: " << type << "\n" << infoLog << std::endl;
 		}
 	}
+}
+
+Shader::~Shader()
+{
+	glDeleteProgram(m_ID);
+}
+
+void Shader::StartProgram()
+{
+	glUseProgram(m_ID);
+}
+
+void Shader::StopProgram()
+{
+	glUseProgram(0);
+}
+
+std::shared_ptr<Shader> Shader::CreateVertexFragmentShader(const char* vertexFilePath, const char* fragmentFilePath)
+{
+	std::string vertexString = GetFileContents(vertexFilePath);
+	const char* vertexSource = vertexString.c_str();
+
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexSource, NULL);
+
+	glCompileShader(vertexShader);
+	compileErrors(vertexShader, "VERTEX");
+
+
+	std::string fragmentString = GetFileContents(fragmentFilePath);
+	const char* fragmentSource = fragmentString.c_str();
+
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+
+	glCompileShader(fragmentShader);
+	compileErrors(fragmentShader, "FRAGMENT");
+
+
+	GLuint ID = glCreateProgram();
+
+	glAttachShader(ID, vertexShader);
+	glAttachShader(ID, fragmentShader);
+
+	glLinkProgram(ID);
+	compileErrors(ID, "PROGRAM");
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	std::shared_ptr<Shader> shader = std::make_shared<Shader>();
+	shader->m_ID = ID;
+
+	return shader;
 }

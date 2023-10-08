@@ -1,4 +1,3 @@
-#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -11,29 +10,73 @@
 
 Application Application::s_Instance;
 
+void Application::Create(Scene* initialScene)
+{
+    s_Instance.m_Window = Window::CreateWindow();
+    if (!s_Instance.m_Window)
+    {
+        return;
+    }
+
+    WindowHandler::Setup(s_Instance.m_Window);
+    MouseHandler::Setup(s_Instance.m_Window);
+    KeyboardHandler::Setup(s_Instance.m_Window);
+
+    AddScene(initialScene);
+}
+
 void Application::Run()
 {
-	//s_Instance = Application();
-	s_Instance.m_Window = Window::CreateWindow();
-	if (!s_Instance.m_Window)
-	{
-		return;
-	}
+    if (!s_Instance.m_Window)
+    {
+        return;
+    }
 
-	WindowHandler::Setup(s_Instance.m_Window);
-	MouseHandler::Setup(s_Instance.m_Window);
-	KeyboardHandler::Setup(s_Instance.m_Window);
+    s_Instance.m_LastUpdateTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(s_Instance.m_Window))
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        if (s_Instance.m_Scenes.size() == 0)
+        {
+            break;
+        }
 
-        glfwSwapBuffers(s_Instance.m_Window);
+        double currentTime = glfwGetTime();
+        double deltaTime = currentTime - s_Instance.m_LastUpdateTime;
+        s_Instance.m_LastUpdateTime = currentTime;
+
+        for (Scene* scene : s_Instance.m_Scenes)
+        {
+            scene->OnUpdate(deltaTime);
+        }
 
         glfwPollEvents();
-    }
 
+        glfwSwapBuffers(s_Instance.m_Window);
+    }
+}
+
+void Application::Destroy()
+{
     glfwDestroyWindow(s_Instance.m_Window);
     glfwTerminate();
+}
+
+void Application::AddScene(Scene* scene)
+{
+    auto iterator = std::find(s_Instance.m_Scenes.begin(), s_Instance.m_Scenes.end(), scene);
+    if (iterator == s_Instance.m_Scenes.end())
+    {
+        // Scene is not in the vector, so add it
+        scene->OnCreate();
+        s_Instance.m_Scenes.push_back(scene);
+    }
+}
+
+
+void Application::RemoveScene(Scene* scene)
+{
+    auto iterator = std::remove(s_Instance.m_Scenes.begin(), s_Instance.m_Scenes.end(), scene);
+    s_Instance.m_Scenes.erase(iterator, s_Instance.m_Scenes.end());
+    scene->OnDestroy();
 }
