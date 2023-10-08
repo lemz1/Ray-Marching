@@ -1,4 +1,6 @@
 ## 
+bin
+bin-int
 Ray Marching/*.vcxproj
 Ray Marching.sln
 
