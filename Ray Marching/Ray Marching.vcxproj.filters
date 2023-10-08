@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libraries">
+      <UniqueIdentifier>{22796F86-8EE3-23FD-D721-D5A243CB0152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include">
+      <UniqueIdentifier>{95A2ECC9-01B9-EA5F-4A30-7681B685BBE7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\GLFW">
+      <UniqueIdentifier>{F4422D20-E03C-5672-C9A9-EC82B542BCDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\KHR">
+      <UniqueIdentifier>{89F3105E-F55F-CC58-BE53-64B62A7FEEC0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\glad">
+      <UniqueIdentifier>{BC5A3F20-A854-6872-91C1-FE827D5ACEDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\glm">
+      <UniqueIdentifier>{646F115E-D0DB-CC58-99CF-64B605FBEEC0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\glm\detail">
+      <UniqueIdentifier>{A6AE8FA8-9269-7F54-3B21-F89E27BBC9E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\glm\simd">
+      <UniqueIdentifier>{400A26AA-2C1A-D27A-95D3-36998102C113}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core">
+      <UniqueIdentifier>{A5D31CCF-91A0-77DA-BAB9-6582A6E5AC68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Objects">
+      <UniqueIdentifier>{E62683BA-52DC-FBAF-DBD0-F5864785F2B3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scenes">
+      <UniqueIdentifier>{BDC7122E-A97F-547B-1287-2DD7FE5DEF6B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils">
+      <UniqueIdentifier>{4D9AFFB3-B904-B42A-0243-65D06EEC917F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\BufferObjects">
+      <UniqueIdentifier>{40C85EA8-ACFF-A63F-B509-0B6321C0CD38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\Input">
+      <UniqueIdentifier>{0C10199A-789B-865E-81AC-0953EDB6E25E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libraries\include\GLFW\glfw3.h">
+      <Filter>libraries\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\GLFW\glfw3native.h">
+      <Filter>libraries\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\KHR\khrplatform.h">
+      <Filter>libraries\include\KHR</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glad\glad.h">
+      <Filter>libraries\include\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\common.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\exponential.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\geometric.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\integer.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\matrix.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\neon.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\packing.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\platform.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\trigonometric.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\include\glm\simd\vector_relational.h">
+      <Filter>libraries\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Application.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Scene.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Window.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Objects\Quad.h">
+      <Filter>src\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scenes\RayMarchingScene.h">
+      <Filter>src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\BufferObjects\ElementBuffer.h">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\BufferObjects\VertexArray.h">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\BufferObjects\VertexBuffer.h">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\Input\KeyboardHandler.h">
+      <Filter>src\Utils\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\Input\MouseHandler.h">
+      <Filter>src\Utils\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\Input\WindowHandler.h">
+      <Filter>src\Utils\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\Mesh.h">
+      <Filter>src\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\Shader.h">
+      <Filter>src\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libraries\include\glm\detail\glm.cpp">
+      <Filter>libraries\include\glm\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Application.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Window.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\glad.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\Quad.cpp">
+      <Filter>src\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scenes\RayMarchingScene.cpp">
+      <Filter>src\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\BufferObjects\ElementBuffer.cpp">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\BufferObjects\VertexArray.cpp">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\BufferObjects\VertexBuffer.cpp">
+      <Filter>src\Utils\BufferObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\Input\KeyboardHandler.cpp">
+      <Filter>src\Utils\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\Input\MouseHandler.cpp">
+      <Filter>src\Utils\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\Input\WindowHandler.cpp">
+      <Filter>src\Utils\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\Shader.cpp">
+      <Filter>src\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
