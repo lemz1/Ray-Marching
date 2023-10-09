@@ -19,6 +19,8 @@ public:
 
 	static const Application& GetInstance() { return s_Instance; }
 
+	static const uint32_t GetWidth();
+	static const uint32_t GetHeight();
 	const GLFWwindow* GetWindow() const { return m_Window; }
 private:
 	static Application s_Instance;

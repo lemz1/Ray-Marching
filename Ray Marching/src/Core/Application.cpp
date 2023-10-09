@@ -80,3 +80,17 @@ void Application::RemoveScene(Scene* scene)
     s_Instance.m_Scenes.erase(iterator, s_Instance.m_Scenes.end());
     scene->OnDestroy();
 }
+
+const uint32_t Application::GetWidth()
+{
+    int width;
+    glfwGetWindowSize(s_Instance.m_Window, &width, nullptr);
+    return width;
+}
+
+const uint32_t Application::GetHeight()
+{
+    int height;
+    glfwGetWindowSize(s_Instance.m_Window, nullptr, &height);
+    return height;
+}
