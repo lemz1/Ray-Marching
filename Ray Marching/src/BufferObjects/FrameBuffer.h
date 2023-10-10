@@ -19,7 +19,10 @@ public:
 	const void Bind() const;
 	const void Unbind() const;
 
+	const TextureSpecification& GetTextureSpecification(uint32_t index) { return m_TextureSpecifications[index]; }
 	void SetTextureSpecification(const TextureSpecification& spec, uint32_t index);
+
+	const RenderBufferSpecification& GetRenderBufferSpecification(uint32_t index) { return m_RenderBufferSpecifications[index]; }
 	void SetRenderBuffereSpecification(const RenderBufferSpecification& spec, uint32_t index);
 
 	const GLuint GetID() const { return m_ID; }
@@ -30,5 +33,8 @@ private:
 	GLuint m_ID;
 
 	std::vector<GLuint> m_TextureIDs;
+	std::vector<TextureSpecification> m_TextureSpecifications;
+
 	std::vector<GLuint> m_RenderBufferIDs;
+	std::vector<RenderBufferSpecification> m_RenderBufferSpecifications;
 };

@@ -5,26 +5,33 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Scene.h"
+#include "../Scenes/Scene.h"
+
+#include "../Events/EventHandler.h"
 
 class Application
 {
 public:
-	static void Create(Scene* initialScene);
-	static void Run();
-	static void Destroy();
+	Application(const char* title, uint32_t width, uint32_t height, Scene* initialScene);
+	~Application();
+	void Run();
 
 	static void AddScene(Scene* scene);
 	static void RemoveScene(Scene* scene);
 
-	static const Application& GetInstance() { return s_Instance; }
+	static const Application* GetInstance() { return s_Instance; }
 
 	static const uint32_t GetWidth();
 	static const uint32_t GetHeight();
-	const GLFWwindow* GetWindow() const { return m_Window; }
+	static const GLFWwindow* GetWindow() { return s_Instance->m_Window; }
+
+	static EventHandler* GetEventHandler() { return s_Instance->m_EventHandler; }
 private:
-	static Application s_Instance;
+	void InitializeEventHandler();
+private:
+	static Application* s_Instance;
 	GLFWwindow* m_Window;
+	EventHandler* m_EventHandler;
 
 	double m_LastUpdateTime;
 

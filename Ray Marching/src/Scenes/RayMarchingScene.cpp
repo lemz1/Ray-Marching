@@ -1,9 +1,14 @@
+#include <glad/glad.h>
+
+#include "../Core/Application.h"
 #include "RayMarchingScene.h"
 
-#include <glad/glad.h>
+#define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
 void RayMarchingScene::OnCreate()
 {
+	Application::GetEventHandler()->AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
+	Application::GetEventHandler()->AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
 
 	m_FullscreenQuad = new FullscreenQuad();
 
@@ -33,4 +38,27 @@ void RayMarchingScene::OnDestroy()
 {
 	delete m_Quad;
 	delete m_FullscreenQuad;
+	Application::GetEventHandler()->ClearEventListeners();
+}
+
+void RayMarchingScene::OnWindowResize(const WindowResizeEvent& event)
+{
+	glViewport(0, 0, event.GetWidth(), event.GetHeight());
+}
+
+void RayMarchingScene::OnKeyboard(const KeyboardEvent& event)
+{
+	if (!event.IsPressed())
+	{
+		return;
+	}
+
+	if (event.GetKey() == GLFW_KEY_SPACE || event.GetKey() == GLFW_KEY_ENTER)
+	{
+		m_IsInScene = true;
+	}
+	else if (event.GetKey() == GLFW_KEY_ESCAPE || event.GetKey() == GLFW_KEY_BACKSPACE)
+	{
+		m_IsInScene = false;
+	}
 }

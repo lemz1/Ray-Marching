@@ -54,6 +54,7 @@ void FrameBuffer::AddTexture(const TextureSpecification& spec)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + m_TextureIDs.size(), GL_TEXTURE_2D, textureID, m_TextureIDs.size());
 	
 	m_TextureIDs.push_back(textureID);
+	m_TextureSpecifications.push_back(spec);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -78,6 +79,7 @@ void FrameBuffer::AddRenderBuffer(const RenderBufferSpecification& spec)
 	}
 	
 	m_RenderBufferIDs.push_back(renderBufferID);
+	m_RenderBufferSpecifications.push_back(spec);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

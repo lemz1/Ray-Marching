@@ -6,7 +6,7 @@
 class Window
 {
 public:
-	static GLFWwindow* CreateWindow();
+	static GLFWwindow* Create(const char* title, uint32_t width, uint32_t height);
 private:
 	static void InitializeOpenGL();
 	static bool InitializeGlad();

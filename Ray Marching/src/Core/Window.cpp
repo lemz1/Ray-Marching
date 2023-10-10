@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-GLFWwindow* Window::CreateWindow()
+GLFWwindow* Window::Create(const char* title, uint32_t width, uint32_t height)
 {
     InitializeOpenGL();
 
     // create window
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Ray Marching", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (window == NULL)
     {
         glfwTerminate();

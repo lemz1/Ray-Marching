@@ -4,7 +4,6 @@
 
 int main()
 {
-	Application::Create(new RayMarchingScene());
-	Application::Run();
-	Application::Destroy();
+	Application app = Application("Ray Marching", 1280, 720, new RayMarchingScene());
+	app.Run();
 }
