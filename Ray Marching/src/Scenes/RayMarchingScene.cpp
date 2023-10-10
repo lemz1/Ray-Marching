@@ -3,10 +3,14 @@
 #include "../Core/Application.h"
 #include "RayMarchingScene.h"
 
+#include "../Debug/OpenGLDebug.h"
+
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
 void RayMarchingScene::OnCreate()
 {
+	Debug::EnableGLDebugging();
+
 	Application::GetEventHandler()->AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
 	Application::GetEventHandler()->AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
 

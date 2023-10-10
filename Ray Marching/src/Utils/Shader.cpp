@@ -31,7 +31,7 @@ void compileErrors(GLuint id, const char* type)
 	}
 	else
 	{
-		glGetProgramiv(id, GL_COMPILE_STATUS, &hasCompiled);
+		glGetProgramiv(id, GL_LINK_STATUS, &hasCompiled);
 		if (hasCompiled == GL_FALSE)
 		{
 			glGetProgramInfoLog(id, 1024, NULL, infoLog);
