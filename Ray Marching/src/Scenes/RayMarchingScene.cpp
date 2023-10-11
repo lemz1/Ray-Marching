@@ -5,14 +5,16 @@
 
 #include "../Debug/OpenGLDebug.h"
 
+#include "../Core/InputHandler.h"
+
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
 void RayMarchingScene::OnCreate()
 {
 	Debug::EnableGLDebugging();
 
-	Application::GetEventHandler()->AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
-	Application::GetEventHandler()->AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
+	EventHandler::AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
+	EventHandler::AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
 
 	m_FullscreenQuad = new FullscreenQuad();
 
@@ -21,11 +23,20 @@ void RayMarchingScene::OnCreate()
 		"assets/shaders/default.frag"
 	);
 
-	m_Quad = new Quad(shader);
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, 2), glm::vec3(0, 0, -1), glm::vec3(1)));
+
+	m_CameraController = CameraController(camera);
+
+	m_Quad = new Quad(shader, camera);
 }
 
 void RayMarchingScene::OnUpdate(double deltaTime)
 {
+	if (m_IsInScene)
+	{
+		m_CameraController.OnUpdate(deltaTime);
+	}
+
 	m_FullscreenQuad->GetFrameBuffer()->Bind();
 
 	glClearColor(.1f, .1f, .1f, 1);
@@ -42,7 +53,7 @@ void RayMarchingScene::OnDestroy()
 {
 	delete m_Quad;
 	delete m_FullscreenQuad;
-	Application::GetEventHandler()->ClearEventListeners();
+	EventHandler::ClearEventListeners();
 }
 
 void RayMarchingScene::OnWindowResize(const WindowResizeEvent& event)
@@ -64,5 +75,6 @@ void RayMarchingScene::OnKeyboard(const KeyboardEvent& event)
 	else if (event.GetKey() == GLFW_KEY_ESCAPE || event.GetKey() == GLFW_KEY_BACKSPACE)
 	{
 		m_IsInScene = false;
+		InputHandler::UnlockCursor();
 	}
 }

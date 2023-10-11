@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Scene.h"
+#include "../Core/Scene.h"
 #include "../Utils/Shader.h"
+#include "../Utils/CameraController.h"
 #include "../Objects/Quad.h"
 #include "../Objects/FullscreenQuad.h"
 #include "../BufferObjects/FrameBuffer.h"
@@ -18,9 +19,11 @@ private:
 	void OnWindowResize(const WindowResizeEvent& event);
 	void OnKeyboard(const KeyboardEvent& event);
 private:
-	bool m_IsInScene = false;
+	bool m_IsInScene = true;
 
 	FullscreenQuad* m_FullscreenQuad;
+
+	CameraController m_CameraController;
 
 	Quad* m_Quad;
 };

@@ -4,8 +4,8 @@
 
 #include <glad/glad.h>
 
-#include "../Utils/Specifications/TextureSpecification.h"
-#include "../Utils/Specifications/RenderBufferSpecification.h"
+#include "Specifications/TextureSpecification.h"
+#include "Specifications/RenderBufferSpecification.h"
 
 class FrameBuffer
 {

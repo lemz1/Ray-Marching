@@ -26,6 +26,8 @@ Application::Application(const char* title, uint32_t width, uint32_t height, Sce
 
     InitializeEventHandler();
 
+    InitializeKeyboardInputHandler();
+
     AddScene(initialScene);
 }
 
@@ -58,6 +60,8 @@ void Application::Run()
             break;
         }
 
+        glfwPollEvents();
+
         double currentTime = glfwGetTime();
         double deltaTime = currentTime - m_LastUpdateTime;
         m_LastUpdateTime = currentTime;
@@ -66,8 +70,6 @@ void Application::Run()
         {
             scene->OnUpdate(deltaTime);
         }
-
-        glfwPollEvents();
 
         glfwSwapBuffers(m_Window);
     }
@@ -115,7 +117,7 @@ void Application::InitializeEventHandler()
         Event event;
         event.windowWidth = width;
         event.windowHeight = height;
-        Application::GetEventHandler()->TriggerEventListeners(EventType::WindowResize, event);
+        EventHandler::TriggerEventListeners(EventType::WindowResize, event);
     });
 
     glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double positionX, double positionY)
@@ -123,7 +125,7 @@ void Application::InitializeEventHandler()
         Event event;
         event.mousePositionX = positionX;
         event.mousePositionY = positionY;
-        Application::GetEventHandler()->TriggerEventListeners(EventType::MouseMove, event);
+        EventHandler::TriggerEventListeners(EventType::MouseMove, event);
     });
 
     glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
@@ -131,7 +133,7 @@ void Application::InitializeEventHandler()
         Event event;
         event.mouseButton = button;
         event.mouseAction = action;
-        Application::GetEventHandler()->TriggerEventListeners(EventType::MouseButton, event);
+        EventHandler::TriggerEventListeners(EventType::MouseButton, event);
     });
 
     glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -139,6 +141,11 @@ void Application::InitializeEventHandler()
         Event event;
         event.key = key;
         event.keyAction = action;
-        Application::GetEventHandler()->TriggerEventListeners(EventType::Keyboard, event);
+        EventHandler::TriggerEventListeners(EventType::Keyboard, event);
     });
+}
+
+void Application::InitializeKeyboardInputHandler()
+{
+    m_KeyboardInputHandler = new InputHandler(m_Window);
 }

@@ -5,9 +5,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "../Scenes/Scene.h"
-
-#include "../Events/EventHandler.h"
+#include "Scene.h"
+#include "EventHandler.h"
+#include "InputHandler.h"
 
 class Application
 {
@@ -24,14 +24,15 @@ public:
 	static const uint32_t GetWidth();
 	static const uint32_t GetHeight();
 	static const GLFWwindow* GetWindow() { return s_Instance->m_Window; }
-
-	static EventHandler* GetEventHandler() { return s_Instance->m_EventHandler; }
 private:
 	void InitializeEventHandler();
+	void InitializeKeyboardInputHandler();
 private:
 	static Application* s_Instance;
+
 	GLFWwindow* m_Window;
 	EventHandler* m_EventHandler;
+	InputHandler* m_KeyboardInputHandler;
 
 	double m_LastUpdateTime;
 
