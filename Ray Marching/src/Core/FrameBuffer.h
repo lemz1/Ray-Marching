@@ -19,10 +19,10 @@ public:
 	const void Bind() const;
 	const void Unbind() const;
 
-	const TextureSpecification& GetTextureSpecification(uint32_t index) { return m_TextureSpecifications[index]; }
+	const TextureSpecification& GetTextureSpecification(uint32_t index) const { return m_TextureSpecifications[index]; }
 	void SetTextureSpecification(const TextureSpecification& spec, uint32_t index);
 
-	const RenderBufferSpecification& GetRenderBufferSpecification(uint32_t index) { return m_RenderBufferSpecifications[index]; }
+	const RenderBufferSpecification& GetRenderBufferSpecification(uint32_t index) const { return m_RenderBufferSpecifications[index]; }
 	void SetRenderBufferSpecification(const RenderBufferSpecification& spec, uint32_t index);
 
 	const GLuint GetID() const { return m_ID; }

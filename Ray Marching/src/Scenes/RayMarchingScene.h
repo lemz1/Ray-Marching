@@ -18,7 +18,9 @@ private:
 	void OnWindowResize(const WindowResizeEvent& event);
 	void OnKeyboard(const KeyboardEvent& event);
 private:
-	bool m_IsInScene = true;
+	bool m_IsInScene = false;
+
+	std::shared_ptr<Shader> m_ComputeShader;
 
 	CameraController m_CameraController;
 

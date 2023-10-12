@@ -30,6 +30,8 @@ public:
 	static const uint32_t GetWidth();
 	static const uint32_t GetHeight();
 	static const GLFWwindow* GetWindow() { return s_Instance->m_Window; }
+
+	static const FrameBuffer* GetViewportFrameBuffer() { return s_Instance->m_ViewportFrameBuffer; }
 private:
 	static Application* s_Instance;
 

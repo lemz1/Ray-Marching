@@ -77,7 +77,6 @@ InputHandler* InitializeKeyboardInputHandler(GLFWwindow* window)
     return new InputHandler(window);
 }
 
-
 FrameBuffer* InitializeViewportFrameBuffer()
 {
     FrameBuffer* frameBuffer = new FrameBuffer();
@@ -103,7 +102,7 @@ void CreateDockSpace(ImGuiIO& io)
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
         ImGuiID dockspace_id = ImGui::GetID("DockSpace");
-
+        
         // Set the default dock configuration if imgui.ini is not present
         if (!ImGui::DockBuilderGetNode(dockspace_id))
         {
