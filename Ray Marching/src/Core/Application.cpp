@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Window.h"
+#include <imgui/imgui_internal.h>
 
 void InitializeOpenGL()
 {
@@ -101,7 +102,17 @@ void CreateDockSpace(ImGuiIO& io)
 
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
-        ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+        ImGuiID dockspace_id = ImGui::GetID("DockSpace");
+
+        // Set the default dock configuration if imgui.ini is not present
+        if (!ImGui::DockBuilderGetNode(dockspace_id))
+        {
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, io.DisplaySize);
+            ImGui::DockBuilderDockWindow("Scene", dockspace_id);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
     }
     ImGui::End();
@@ -206,14 +217,12 @@ void Application::Run()
 
         CreateDockSpace(io);
 
-
         // Display the ViewPortFrameBuffer
         ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoCollapse);
 
         ImVec2 contentRegion = ImGui::GetContentRegionAvail();
         int imageWidth = contentRegion.x;
         int imageHeight = imageWidth / (16.f / 9.f);
-        int imageY = imageHeight / 2;
 
         ImGui::Image(
             (void*)(intptr_t)m_ViewportFrameBuffer->GetTextureID(0),

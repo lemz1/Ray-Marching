@@ -1,6 +1,7 @@
 ## 
 bin
 bin-int
+Ray Marching/imgui.ini
 Ray Marching/*.vcxproj
 Ray Marching/*.vcxproj.user
 Ray Marching/*.vcxproj.filters
