@@ -1,13 +1,19 @@
 #pragma once
 
-#include <vector>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 #include "Scene.h"
 #include "EventHandler.h"
 #include "InputHandler.h"
+
+#include "FrameBuffer.h"
 
 class Application
 {
@@ -25,14 +31,13 @@ public:
 	static const uint32_t GetHeight();
 	static const GLFWwindow* GetWindow() { return s_Instance->m_Window; }
 private:
-	void InitializeEventHandler();
-	void InitializeKeyboardInputHandler();
-private:
 	static Application* s_Instance;
 
 	GLFWwindow* m_Window;
 	EventHandler* m_EventHandler;
-	InputHandler* m_KeyboardInputHandler;
+	InputHandler* m_InputHandler;
+
+	FrameBuffer* m_ViewportFrameBuffer;
 
 	double m_LastUpdateTime;
 

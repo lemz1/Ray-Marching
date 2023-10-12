@@ -16,14 +16,12 @@ void RayMarchingScene::OnCreate()
 	EventHandler::AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
 	EventHandler::AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
 
-	m_FullscreenQuad = new FullscreenQuad();
-
 	std::shared_ptr<Shader> shader = Shader::CreateVertexFragmentShader(
 		"assets/shaders/default.vert",
 		"assets/shaders/default.frag"
 	);
 
-	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, 2), glm::vec3(0, 0, -1), glm::vec3(1)));
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, 3), glm::vec3(0, 0, -1), glm::vec3(1)));
 
 	m_CameraController = CameraController(camera);
 
@@ -37,22 +35,22 @@ void RayMarchingScene::OnUpdate(double deltaTime)
 		m_CameraController.OnUpdate(deltaTime);
 	}
 
-	m_FullscreenQuad->GetFrameBuffer()->Bind();
-
 	glClearColor(.1f, .1f, .1f, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_Quad->Draw();
+}
 
-	m_FullscreenQuad->GetFrameBuffer()->Unbind();
-
-	m_FullscreenQuad->Draw();
+void RayMarchingScene::OnImGuiUpdate(double deltaTime)
+{
+	ImGui::Begin("Render Information");
+	ImGui::Text("Last Render Time: %.5fms", deltaTime);
+	ImGui::End();
 }
 
 void RayMarchingScene::OnDestroy()
 {
 	delete m_Quad;
-	delete m_FullscreenQuad;
 	EventHandler::ClearEventListeners();
 }
 

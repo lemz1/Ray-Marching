@@ -23,12 +23,15 @@ public:
 	void SetTextureSpecification(const TextureSpecification& spec, uint32_t index);
 
 	const RenderBufferSpecification& GetRenderBufferSpecification(uint32_t index) { return m_RenderBufferSpecifications[index]; }
-	void SetRenderBuffereSpecification(const RenderBufferSpecification& spec, uint32_t index);
+	void SetRenderBufferSpecification(const RenderBufferSpecification& spec, uint32_t index);
 
 	const GLuint GetID() const { return m_ID; }
 
 	const GLuint GetTextureID(uint32_t index) const { return m_TextureIDs[index]; }
 	const GLuint GetRenderBufferID(uint32_t index) const { return m_RenderBufferIDs[index]; }
+private:
+	void CreateTexture(GLuint* textureID, const TextureSpecification& spec, uint32_t index);
+	void CreateRenderBuffer(GLuint* renderBufferID, const RenderBufferSpecification& spec, uint32_t index);
 private:
 	GLuint m_ID;
 

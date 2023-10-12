@@ -13,7 +13,7 @@ public:
 		: m_Camera(camera) 
 	{}
 
-	void OnUpdate(float deltaTime);
+	void OnUpdate(double deltaTime);
 
 	const float GetMouseSensitivity() const { return .0025f; }
 	const float GetRotationSpeed() const { return .5f; }
@@ -21,7 +21,7 @@ public:
 
 	const std::shared_ptr<Camera> GetCamera() const { return m_Camera; }
 private:
-	void MoveCamera(float deltaTime);
+	void MoveCamera(double deltaTime);
 private:
 	std::shared_ptr<Camera> m_Camera;
 

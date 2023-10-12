@@ -12,12 +12,12 @@
 
 #define BindEvent(eventCallback) std::bind(&CameraController::eventCallback, this, std::placeholders::_1)
 
-void CameraController::OnUpdate(float deltaTime)
+void CameraController::OnUpdate(double deltaTime)
 {
 	MoveCamera(deltaTime);
 }
 
-void CameraController::MoveCamera(float deltaTime)
+void CameraController::MoveCamera(double deltaTime)
 {
 	Transform transform = m_Camera->GetTransform();
 
@@ -28,34 +28,34 @@ void CameraController::MoveCamera(float deltaTime)
 
 	if (InputHandler::KeyIsHeld(GLFW_KEY_W))
 	{
-		transform.position += transform.rotation * GetMovementSpeed() * deltaTime;
+		transform.position += transform.rotation * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	} 
 	else if (InputHandler::KeyIsHeld(GLFW_KEY_S))
 	{
-		transform.position -= transform.rotation * GetMovementSpeed() * deltaTime;
+		transform.position -= transform.rotation * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	}
 
 	if (InputHandler::KeyIsHeld(GLFW_KEY_D))
 	{
-		transform.position += rightDirection * GetMovementSpeed() * deltaTime;
+		transform.position += rightDirection * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	}
 	else if (InputHandler::KeyIsHeld(GLFW_KEY_A))
 	{
-		transform.position -= rightDirection * GetMovementSpeed() * deltaTime;
+		transform.position -= rightDirection * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	}
 
 	if (InputHandler::KeyIsHeld(GLFW_KEY_E))
 	{
-		transform.position += upDirection * GetMovementSpeed() * deltaTime;
+		transform.position += upDirection * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	}
 	else if (InputHandler::KeyIsHeld(GLFW_KEY_Q))
 	{
-		transform.position -= upDirection * GetMovementSpeed() * deltaTime;
+		transform.position -= upDirection * GetMovementSpeed() * (float)deltaTime;
 		moved = true;
 	}
 
