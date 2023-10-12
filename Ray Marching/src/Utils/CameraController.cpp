@@ -9,6 +9,7 @@
 
 #include "../Core/InputHandler.h"
 
+// thanks Cherno for some of the CameraController code (i took some of it from the Raytracing Series)
 
 #define BindEvent(eventCallback) std::bind(&CameraController::eventCallback, this, std::placeholders::_1)
 
