@@ -7,10 +7,45 @@ layout (rgba8, binding = 0) uniform image2D img_output;
 uniform uint width;
 uniform uint height;
 
-struct Light 
+uniform uint numSDFObjects;
+uniform uint numPointLights;
+uniform uint numDirectionalLights;
+
+struct SDFObject 
+{
+    vec3 position;
+    vec3 rotation;
+    vec3 scale;
+    uint type; // 0 Sphere, 1 Box, 2 Torus
+};
+
+struct PointLight
+{
+    vec3 position;
+    vec3 color;
+    uint lightFalloffType; // 0 None, 1 Linear, 2 Quadractic
+    float intensity;
+};
+
+struct DirectionalLight 
 {
     vec3 direction;
     vec3 color;
+};
+
+layout(std430, binding = 1) buffer SDFObjectsBuffer
+{
+    SDFObject sdfObjects[];
+};
+
+layout(std430, binding = 2) buffer PointLightsBuffer
+{
+    PointLight pointLights[];
+};
+
+layout(std430, binding = 3) buffer DirectionalLightsBuffer
+{
+    DirectionalLight directionalLights[];
 };
 
 struct Ray 
@@ -24,20 +59,15 @@ struct HitInfo
     float minDistance;
     float totalDistance;
     bool hit;
+    uint index;
 };
 
-struct Sphere 
+float sd_Sphere(SDFObject sphere, vec3 point) 
 {
-    vec3 origin;
-    float radius;
-};
-
-float sd_Sphere(Sphere sphere, vec3 point) 
-{
-    return length(point - sphere.origin) - sphere.radius;
+    return length(point - sphere.position) - sphere.scale.x;
 }
 
-vec3 calculateLighting(Light light, vec3 normal) 
+vec3 calculateLighting(DirectionalLight light, vec3 normal) 
 {
     float dotNL = dot(normal, light.direction);
     vec3 diffuse = max(dotNL, 0.0) * light.color;
@@ -47,17 +77,41 @@ vec3 calculateLighting(Light light, vec3 normal)
 const uint MAX_STEPS = 100;
 const float MAX_DISTANCE = 100;
 const float epsilon = 0.01;
-HitInfo rayMarch(Ray ray, Sphere sphere) 
+HitInfo rayMarch(Ray ray) 
 {
     HitInfo hitInfo;
     hitInfo.totalDistance = 0.0;
     hitInfo.minDistance = MAX_DISTANCE;
     hitInfo.hit = false;
+    hitInfo.index = 0;
     
     for (int i = 0; i < MAX_STEPS; i++) 
     {
         vec3 point = ray.origin + ray.direction * hitInfo.totalDistance;
-        float d = sd_Sphere(sphere, point);
+
+        float d = MAX_DISTANCE;
+
+        for (int j = 0; j < numSDFObjects; j++) 
+        {
+            float localD;
+            switch (sdfObjects[j].type)
+            {
+                case 0: // Sphere
+                    localD = sd_Sphere(sdfObjects[j], point);
+                    break;
+                case 1: // Box
+                    localD = sd_Sphere(sdfObjects[j], point);
+                    break;
+                case 2: // Torus
+                    localD = sd_Sphere(sdfObjects[j], point);
+                    break;
+            }
+            if (localD < d) 
+            {
+                d = localD;
+                hitInfo.index = j;
+            }
+        }
 
         if (d < epsilon) 
         {
@@ -92,24 +146,20 @@ void main()
     vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height) * 2.0 - 1.0;
     uv.x *= float(width) / float(height);
 
-    Sphere sphere;
-    sphere.radius = 1.0;
-    sphere.origin = vec3(0, 0, 0);
-
-    Light light;
-    light.direction = normalize(vec3(1, 1, 0)); // Set the direction of the light
+    DirectionalLight light;
+    light.direction = normalize(vec3(0, 1, 0)); // Set the direction of the light
     light.color = vec3(1, 1, 1); // Set the color of the light
 
     Ray ray;
     ray.origin = vec3(0, 0, -2); // Set the origin of the ray
     ray.direction = normalize(vec3(uv, 1)); // Set the direction of the ray
 
-    HitInfo hitInfo = rayMarch(ray, sphere);
+    HitInfo hitInfo = rayMarch(ray);
     vec4 pixel;
 
-    if (hitInfo.minDistance < epsilon) // If the ray hits the sphere
+    if (hitInfo.hit) // If the ray hits the sphere
     {
-        vec3 normal = normalize(ray.origin + ray.direction * hitInfo.totalDistance - sphere.origin); // Calculate the normal
+        vec3 normal = normalize(ray.origin + ray.direction * hitInfo.totalDistance - sdfObjects[hitInfo.index].position); // Calculate the normal
         vec3 lighting = calculateLighting(light, normal); // Calculate the lighting
         vec3 ambientColor = vec3(0.2, 0.0, 0.0);
         vec3 diffuseColor = vec3(1.0, 0.0, 0.0);

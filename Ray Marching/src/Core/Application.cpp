@@ -209,6 +209,8 @@ void Application::Run()
 
         m_ViewportFrameBuffer->Unbind();
 
+        
+
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -230,6 +232,14 @@ void Application::Run()
             ImVec2(1, 0)
         );
         ImGui::End();
+
+        /* doesnt work
+        TextureSpecification spec;
+        spec.width = imageWidth;
+        spec.height = imageHeight;
+        spec.format = RGBA8;
+        m_ViewportFrameBuffer->SetTextureSpecification(spec, 0);
+        */
 
         for (Scene* scene : m_Scenes)
         {

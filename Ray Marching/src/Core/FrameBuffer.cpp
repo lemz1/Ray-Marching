@@ -12,15 +12,11 @@ void FrameBuffer::CreateTexture(GLuint* textureID, const TextureSpecification& s
 	switch (spec.format)
 	{
 		case TextureFormat::RGBA8:
-		{
 			glTexImage2D(GL_TEXTURE_2D, index, spec.format, spec.width, spec.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		}
-		break;
+			break;
 		case TextureFormat::RGBA32F:
-		{
 			glTexImage2D(GL_TEXTURE_2D, index, spec.format, spec.width, spec.height, 0, GL_RGBA, GL_FLOAT, nullptr);
-		}
-		break;
+			break;
 	}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -44,11 +40,9 @@ void FrameBuffer::CreateRenderBuffer(GLuint* renderBufferID, const RenderBufferS
 	switch (spec.format)
 	{
 		case RenderBufferFormat::DEPTH24STENCIL8:
-		{
 			glRenderbufferStorage(GL_RENDERBUFFER, spec.format, spec.width, spec.height);
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *renderBufferID);
-		}
-		break;
+			break;
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

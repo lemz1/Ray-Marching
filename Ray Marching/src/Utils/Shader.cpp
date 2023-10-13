@@ -30,7 +30,7 @@ void CompileErrors(GLuint id, GLenum type)
 				std::cout << "SHADER LINKING ERROR: " << "\n" << infoLog << std::endl;
 			}
 			break;
-		case GL_VERTEX_SHADER | GL_FRAGMENT_SHADER:
+		case GL_VERTEX_SHADER | GL_FRAGMENT_SHADER | GL_COMPUTE_SHADER:
 			glGetShaderiv(id, GL_COMPILE_STATUS, &hasCompiled);
 			if (hasCompiled == GL_FALSE)
 			{
