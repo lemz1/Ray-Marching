@@ -11,11 +11,10 @@ uniform uint numSDFObjects;
 uniform uint numPointLights;
 uniform uint numDirectionalLights;
 
-uniform mat4 viewMatrix;
-uniform mat4 inverseViewMatrix;
-
-uniform mat4 projectionMatrix;
-uniform mat4 inverseProjectionMatrix;
+uniform float verticalFOV;
+uniform float aspectRatio;
+uniform vec3 cameraOrigin;
+uniform vec3 cameraTarget;
 
 //const uint MAX_STEPS = 200;
 const float MAX_DISTANCE = 50;
@@ -76,6 +75,7 @@ struct Material
     vec3 ambientColor;
     vec3 diffuseColor;
     vec3 specularColor;
+    float shininess;
 };
 
 struct SDFObject 
@@ -110,6 +110,7 @@ SDFObject trashToObject(SDFObjectTrash trash)
     object.material.ambientColor = vec3(trash.ambientColor[0], trash.ambientColor[1], trash.ambientColor[2]);
     object.material.diffuseColor = vec3(trash.diffuseColor[0], trash.diffuseColor[1], trash.diffuseColor[2]);
     object.material.specularColor = vec3(trash.specularColor[0], trash.specularColor[1], trash.specularColor[2]);
+    object.material.shininess = trash.shininess;
     object.type = trash.type;
     return object;
 }
@@ -173,11 +174,16 @@ vec3 calculateNormalTorus(SDFObject torus, vec3 point)
 }
 
 
-vec3 calculateLighting(DirectionalLight light, vec3 normal) 
+vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Material material) 
 {
     float dotNL = dot(normal, light.direction);
-    vec3 diffuse = max(dotNL, 0.0) * light.color;
-    return diffuse;
+    vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
+
+    vec3 halfwayDir = normalize(light.direction + viewDir);
+    float specularIntensity = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = material.specularColor * specularIntensity * light.color;
+
+    return material.ambientColor + diffuse + specular;
 }
 
 HitInfo rayMarch(Ray ray) 
@@ -249,18 +255,29 @@ void main()
         return;
     }
 
-    vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height) * 2.0 - 1.0;
-    uv.x *= float(width) / float(height);
+    vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height);
+    //uv.x *= float(width) / float(height);
+
+    float theta = (3.1415926 / 180.0) * verticalFOV;
+    float height = 2.0 * tan(theta / 2.0);
+    float width = height * aspectRatio;
+
+    vec3 y = vec3(0, 1, 0);
+    vec3 w = normalize(cameraOrigin - cameraTarget);
+    vec3 u = normalize(cross(y, w));
+    vec3 v = cross(w, u);
+
+    vec3 horizontalComp = width * u;
+    vec3 verticalComp = height * v;
+    vec3 bottomLeft = cameraOrigin - (horizontalComp / 2.0) - (verticalComp / 2.0) - w;
 
     Ray ray;
 
-    ray.origin = vec3(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2]);
-
-    vec4 target = inverseProjectionMatrix * vec4(uv, 1, 1);
-    ray.direction = vec3(inverseViewMatrix * vec4(normalize(vec3(target) / target.w), 0));
+    ray.origin = cameraOrigin;
+    ray.direction = bottomLeft + uv.x * horizontalComp + uv.y * verticalComp - cameraOrigin;
 
     DirectionalLight light;
-    light.direction = vec3(0, 1, 0);
+    light.direction = vec3(1, 1, 0);
     light.color = vec3(1, 1, 1); 
 
     HitInfo hitInfo = rayMarch(ray);
@@ -286,8 +303,9 @@ void main()
             break;
     }
 
-    vec3 lighting = calculateLighting(light, normal); // Calculate the lighting
-    vec4 pixel = vec4(hitInfo.object.material.ambientColor + hitInfo.object.material.diffuseColor * lighting, 1.0);
-    
+    vec3 viewDir = normalize(cameraOrigin - hitInfo.surfacePoint);
+    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.object.material); // Calculate the lighting
+    vec4 pixel = vec4(lighting, 1.0);
+
     imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);
 }

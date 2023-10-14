@@ -22,6 +22,12 @@ public:
 	const glm::mat4& GetInverseProjectionMatrix() const { return m_InverseProjectionMatrix; }
 
 	const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+
+	const float GetVerticalFOV() { return m_VerticalFOV; }
+	const float GetNearClipPlane() { return m_NearClipPlane; }
+	const float GetFarClipPlane() { return m_FarClipPlane; }
+	const uint32_t GetWidth() { return m_Width; }
+	const uint32_t GetHeight() { return m_Height; }
 private:
 	void RecalculateProjectionMatrix();
 	void RecalculateViewMatrix();

@@ -51,7 +51,6 @@ void RayMarchingScene::OnUpdate(double deltaTime)
 	GLuint textureID = Application::GetViewportFrameBuffer()->GetTextureID(0);
 	TextureSpecification spec = Application::GetViewportFrameBuffer()->GetTextureSpecification(0);
 
-
 	glUseProgram(m_ComputeShader->GetID());
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "width"), spec.width);
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "height"), spec.height);
@@ -60,15 +59,20 @@ void RayMarchingScene::OnUpdate(double deltaTime)
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "numPointLights"), m_PointLights.size());
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "numDirectionalLights"), m_DirectionalLights.size());
 
-	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "viewMatrix"), 1,
-		GL_FALSE, &m_CameraController.GetCamera()->GetViewMatrix()[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseViewMatrix"), 1,
-		GL_FALSE, &m_CameraController.GetCamera()->GetInverseViewMatrix()[0][0]);
+	std::shared_ptr<Camera> camera = m_CameraController.GetCamera();
+	glUniform1f(glGetUniformLocation(m_ComputeShader->GetID(), "verticalFOV"), camera->GetVerticalFOV());
+	glUniform1f(glGetUniformLocation(m_ComputeShader->GetID(), "aspectRatio"), (float)camera->GetWidth() / (float)camera->GetHeight());
 
-	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "projectionMatrix"), 1,
-		GL_FALSE, &m_CameraController.GetCamera()->GetProjectionMatrix()[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseProjectionMatrix"), 1,
-		GL_FALSE, &m_CameraController.GetCamera()->GetInverseProjectionMatrix()[0][0]);
+	Transform camT = camera->GetTransform();
+	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraOrigin"),
+		camT.position.x, 
+		camT.position.y, 
+		camT.position.z);
+
+	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraTarget"), 
+		camT.position.x + camT.rotation.x,
+		camT.position.y + camT.rotation.y, 
+		camT.position.z + camT.rotation.z);
 
 	m_SDFObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
