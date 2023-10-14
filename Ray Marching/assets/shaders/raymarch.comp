@@ -29,8 +29,6 @@ struct SDFObjectTrash
     float scale[3];
     float ambientColor[3];
     float diffuseColor[3];
-    float specularColor[3];
-    float shininess;
     uint type; // 0 Sphere, 1 Box, 2 Torus
 };
 
@@ -74,8 +72,6 @@ struct Material
 {
     vec3 ambientColor;
     vec3 diffuseColor;
-    vec3 specularColor;
-    float shininess;
 };
 
 struct SDFObject 
@@ -109,8 +105,6 @@ SDFObject trashToObject(SDFObjectTrash trash)
     object.transform.scale = vec3(trash.scale[0], trash.scale[1], trash.scale[2]);
     object.material.ambientColor = vec3(trash.ambientColor[0], trash.ambientColor[1], trash.ambientColor[2]);
     object.material.diffuseColor = vec3(trash.diffuseColor[0], trash.diffuseColor[1], trash.diffuseColor[2]);
-    object.material.specularColor = vec3(trash.specularColor[0], trash.specularColor[1], trash.specularColor[2]);
-    object.material.shininess = trash.shininess;
     object.type = trash.type;
     return object;
 }
@@ -179,11 +173,7 @@ vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Materi
     float dotNL = dot(normal, light.direction);
     vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
 
-    vec3 halfwayDir = normalize(light.direction + viewDir);
-    float specularIntensity = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
-    vec3 specular = material.specularColor * specularIntensity * light.color;
-
-    return material.ambientColor + diffuse + specular;
+    return material.ambientColor + diffuse;
 }
 
 HitInfo rayMarch(Ray ray) 
@@ -236,10 +226,11 @@ HitInfo rayMarch(Ray ray)
         if (hitInfo.totalDistance > MAX_DISTANCE) 
         {
             break;
-        } 
-        else if (hitInfo.totalDistance < hitInfo.minDistance)
+        }
+        
+        if (d < hitInfo.minDistance)
         {
-            hitInfo.minDistance = hitInfo.totalDistance;
+            hitInfo.minDistance = d;
         }
     }
 
@@ -284,7 +275,8 @@ void main()
 
     if (!hitInfo.hit) // return early if it didnt hit
     {
-        vec4 pixel = vec4(0.0, 0.0, 0.0, 1.0);
+        vec4 pixel;
+        pixel = vec4(0.0, 0.2, 0.5, 1.0);
         imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);
         return;
     }

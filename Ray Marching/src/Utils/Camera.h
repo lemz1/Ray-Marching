@@ -13,7 +13,7 @@ public:
 	void OnResize(uint32_t width, uint32_t height);
 
 	const Transform& GetTransform() const { return m_Transform; }
-	void SetTransform(const Transform& transform) { m_Transform = transform; RecalculateViewMatrix(); }
+	void SetTransform(const Transform& transform) { m_Transform = transform; RecalculateViewMatrix(); RecalculateCameraToWorldMatrix(); }
 
 	const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 	const glm::mat4& GetInverseViewMatrix() const { return m_InverseViewMatrix; }
@@ -23,6 +23,8 @@ public:
 
 	const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
+	const glm::mat4& GetCameraToWorldMatrix() { return m_CameraToWorldMatrix; }
+
 	const float GetVerticalFOV() { return m_VerticalFOV; }
 	const float GetNearClipPlane() { return m_NearClipPlane; }
 	const float GetFarClipPlane() { return m_FarClipPlane; }
@@ -31,6 +33,7 @@ public:
 private:
 	void RecalculateProjectionMatrix();
 	void RecalculateViewMatrix();
+	void RecalculateCameraToWorldMatrix();
 private:
 	Transform m_Transform;
 
@@ -41,6 +44,8 @@ private:
 	glm::mat4 m_InverseProjectionMatrix = glm::mat4(1);
 
 	glm::mat4 m_ViewProjectionMatrix = glm::mat4(1);
+
+	glm::mat4 m_CameraToWorldMatrix = glm::mat4(1);
 
 	float m_VerticalFOV, m_NearClipPlane, m_FarClipPlane;
 

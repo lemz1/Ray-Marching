@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../Core/Application.h"
 #include "RayMarchingScene.h"
@@ -28,10 +29,17 @@ void RayMarchingScene::OnCreate()
 
 	m_ComputeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
 	
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(-3, 0, 3)), Material(), SDFObjectType::Sphere));
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(-2, -2, 3)), Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.8f, 0)), SDFObjectType::Box));
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(0, -5, 0), glm::vec3(0), glm::vec3(100, 1, 100)), Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.8f, 0, 0)), SDFObjectType::Box));
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(2, -3, 3), glm::vec3(0), glm::vec3(1, 0.25f, 1)), Material(), SDFObjectType::Torus));
+	m_Objects.push_back(SDFObject(
+		Transform(glm::vec3(0, 3, 0)),
+		Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.25f, 0)),
+		SDFObjectType::Box)
+	);
+
+	m_Objects.push_back(SDFObject(
+		Transform(glm::vec3(0, 0, 0), glm::vec3(0), glm::vec3(100, 1, 100)),
+		Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.25f, 0, 0)),
+		SDFObjectType::Box)
+	);
 
 	m_SDFObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
 	m_PointLightsBuffer = new StorageBuffer(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight), 2);

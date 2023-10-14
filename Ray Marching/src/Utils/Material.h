@@ -5,11 +5,9 @@
 struct Material
 {
 public:
-	Material(glm::vec3 ambientColor = glm::vec3(0.2f), glm::vec3 diffuseColor = glm::vec3(0.8),
-			 glm::vec3 specularColor = glm::vec3(1), float shininess = 16)
-		: ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess)
+	Material(glm::vec3 ambientColor = glm::vec3(0.2f), glm::vec3 diffuseColor = glm::vec3(0.8))
+		: ambientColor(ambientColor), diffuseColor(diffuseColor)
 	{}
 
-	glm::vec3 ambientColor, diffuseColor, specularColor;
-	float shininess;
+	glm::vec3 ambientColor, diffuseColor;
 };

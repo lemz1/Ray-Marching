@@ -46,3 +46,39 @@ void Camera::RecalculateViewMatrix()
 
 	m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 }
+
+void Camera::RecalculateCameraToWorldMatrix()
+{
+	glm::mat4 translationMatrix = glm::mat4(
+		1, 0, 0, m_Transform.position.x,
+		0, 1, 0, m_Transform.position.y,
+		0, 0, 1, m_Transform.position.z,
+		0, 0, 0, 1
+	);
+
+	const float PI = 3.1415926;
+	float roll = m_Transform.rotation.x * PI / 180.f;
+	float pitch = m_Transform.rotation.y * PI / 180.f;
+	float yaw = m_Transform.rotation.z * PI / 180.f;
+
+	glm::mat4 rotationMatrix = glm::mat4(
+		cos(yaw) * cos(pitch),
+		sin(yaw) * cos(pitch),
+		-sin(pitch),
+		0,
+
+		cos(yaw) * sin(pitch) * cos(roll) - sin(yaw) * sin(roll),
+		sin(yaw) * sin(pitch) * cos(roll) + cos(yaw) * sin(roll),
+		cos(pitch) * sin(roll),
+		0,
+
+		cos(yaw) * sin(pitch) * sin(roll) + sin(yaw) * cos(roll),
+		sin(yaw) * sin(pitch) * sin(roll) - cos(yaw) * cos(roll),
+		cos(pitch) * cos(roll),
+		0,
+
+		0, 0, 0, 1
+	);
+
+	m_CameraToWorldMatrix = rotationMatrix * translationMatrix;
+}
