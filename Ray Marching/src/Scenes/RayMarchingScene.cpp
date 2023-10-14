@@ -9,6 +9,7 @@
 
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
+
 void RayMarchingScene::OnCreate()
 {
 	Debug::EnableGLDebugging();
@@ -26,13 +27,10 @@ void RayMarchingScene::OnCreate()
 	m_CameraController = CameraController(camera);
 
 	m_ComputeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
-
-	//m_Objects.push_back(SDFObject(glm::vec3(1, 0, 0)));
-	//m_Objects.push_back(SDFObject(glm::vec3(-1, 0, -1)));
 	
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(1, 0, 0))));
-	//m_Objects.push_back(SDFObject(Transform(glm::vec3(0, 0, -1))));
-	//m_Objects.push_back(SDFObject(Transform(glm::vec3(0, 0, -1))));
+	m_Objects.push_back(SDFObject(Transform(glm::vec3(-3, 0, 3)), Material(), SDFObjectType::Sphere));
+	m_Objects.push_back(SDFObject(Transform(glm::vec3(-2, -2, 3)), Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.8f, 0, 0)), SDFObjectType::Box));
+	m_Objects.push_back(SDFObject(Transform(glm::vec3(2, -3, 3), glm::vec3(0), glm::vec3(1, 0.25f, 1)), Material(), SDFObjectType::Torus));
 
 	m_SDFObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
 	m_PointLightsBuffer = new StorageBuffer(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight), 2);
@@ -86,11 +84,12 @@ void RayMarchingScene::OnUpdate(double deltaTime)
 void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 {
 	ImGui::Begin("Information");
-	ImGui::Text("Last Render Time: %.5fms", deltaTime);
+	ImGui::Text("Last Render Time: %.5fms", deltaTime * 1000.f);
 	ImGui::Text("FPS: %d", (int)(1 / deltaTime));
 	ImGui::Text("\nCONTROLS");
 	ImGui::Text("Exit Scene: ESCAPE or BACKSPACE");
 	ImGui::Text("Enter Scene: SPACE or ENTER");
+	ImGui::Text("Capped FPS Off/On: V");
 	ImGui::End();
 }
 
@@ -106,9 +105,16 @@ void RayMarchingScene::OnWindowResize(const WindowResizeEvent& event)
 
 void RayMarchingScene::OnKeyboard(const KeyboardEvent& event)
 {
+	static bool s_Capped = true;
 	if (!event.IsPressed())
 	{
 		return;
+	}
+
+	if (event.GetKey() == GLFW_KEY_V)
+	{
+		s_Capped = !s_Capped;
+		glfwSwapInterval(s_Capped);
 	}
 
 	if (event.GetKey() == GLFW_KEY_SPACE || event.GetKey() == GLFW_KEY_ENTER)
