@@ -22,14 +22,15 @@ void RayMarchingScene::OnCreate()
 		"assets/shaders/default.frag"
 	);
 
-	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, 3), glm::vec3(0, 0, -1), glm::vec3(1)));
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, -3), glm::vec3(0, 0, 1)));
 
 	m_CameraController = CameraController(camera);
 
 	m_ComputeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
 	
 	m_Objects.push_back(SDFObject(Transform(glm::vec3(-3, 0, 3)), Material(), SDFObjectType::Sphere));
-	m_Objects.push_back(SDFObject(Transform(glm::vec3(-2, -2, 3)), Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.8f, 0, 0)), SDFObjectType::Box));
+	m_Objects.push_back(SDFObject(Transform(glm::vec3(-2, -2, 3)), Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.8f, 0)), SDFObjectType::Box));
+	m_Objects.push_back(SDFObject(Transform(glm::vec3(0, -5, 0), glm::vec3(0), glm::vec3(100, 1, 100)), Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.8f, 0, 0)), SDFObjectType::Box));
 	m_Objects.push_back(SDFObject(Transform(glm::vec3(2, -3, 3), glm::vec3(0), glm::vec3(1, 0.25f, 1)), Material(), SDFObjectType::Torus));
 
 	m_SDFObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
@@ -58,6 +59,16 @@ void RayMarchingScene::OnUpdate(double deltaTime)
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "numSDFObjects"), m_Objects.size());
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "numPointLights"), m_PointLights.size());
 	glUniform1ui(glGetUniformLocation(m_ComputeShader->GetID(), "numDirectionalLights"), m_DirectionalLights.size());
+
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "viewMatrix"), 1,
+		GL_FALSE, &m_CameraController.GetCamera()->GetViewMatrix()[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseViewMatrix"), 1,
+		GL_FALSE, &m_CameraController.GetCamera()->GetInverseViewMatrix()[0][0]);
+
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "projectionMatrix"), 1,
+		GL_FALSE, &m_CameraController.GetCamera()->GetProjectionMatrix()[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseProjectionMatrix"), 1,
+		GL_FALSE, &m_CameraController.GetCamera()->GetInverseProjectionMatrix()[0][0]);
 
 	m_SDFObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));

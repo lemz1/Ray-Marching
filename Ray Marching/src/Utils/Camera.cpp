@@ -4,15 +4,15 @@
 
 #include "../Core/Application.h"
 
-Camera::Camera(float verticalFOV, float nearPlane, float farPlane)
-	: m_VerticalFOV(verticalFOV), m_NearPlane(nearPlane), m_FarPlane(farPlane)
+Camera::Camera(float verticalFOV, float nearClipPlane, float farClipPlane)
+	: m_VerticalFOV(verticalFOV), m_NearClipPlane(nearClipPlane), m_FarClipPlane(farClipPlane)
 {
 	SetTransform(Transform());
 	OnResize(Application::GetWidth(), Application::GetHeight());
 }
 
-Camera::Camera(const Transform & transform, float verticalFOV, float nearPlane, float farPlane)
-	: m_VerticalFOV(verticalFOV), m_NearPlane(nearPlane), m_FarPlane(farPlane)
+Camera::Camera(const Transform & transform, float verticalFOV, float nearClipPlane, float farClipPlane)
+	: m_VerticalFOV(verticalFOV), m_NearClipPlane(nearClipPlane), m_FarClipPlane(farClipPlane)
 {
 	SetTransform(transform);
 	OnResize(Application::GetWidth(), Application::GetHeight());
@@ -33,7 +33,7 @@ void Camera::OnResize(uint32_t width, uint32_t height)
 
 void Camera::RecalculateProjectionMatrix()
 {
-	m_ProjectionMatrix = glm::perspectiveFov(glm::radians(m_VerticalFOV), (float)m_Width, (float)m_Height, m_NearPlane, m_FarPlane);
+	m_ProjectionMatrix = glm::perspectiveFov(glm::radians(m_VerticalFOV), (float)m_Width, (float)m_Height, m_NearClipPlane, m_FarClipPlane);
 	m_InverseProjectionMatrix = glm::inverse(m_ProjectionMatrix);
 
 	m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
