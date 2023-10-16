@@ -1,6 +1,6 @@
 #include "Core/Application.h"
 
-#include "Scenes/RayMarchingScene.h"
+#include "Scenes/Ray Marching/RayMarchingScene.h"
 
 int main()
 {

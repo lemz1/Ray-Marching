@@ -10,18 +10,18 @@ VertexArray::~VertexArray()
 	glDeleteVertexArrays(1, &m_ID);
 }
 
-void VertexArray::LinkVertexBuffer(const VertexBuffer& vertexBuffer, GLuint layout, GLuint numberOfComponents)
+void VertexArray::LinkVertexBuffer(GLuint vertexBufferID, GLuint layout, GLuint numberOfComponents)
 {
-	glVertexArrayVertexBuffer(m_ID, layout, vertexBuffer.GetID(), 0, numberOfComponents * sizeof(float));
+	glVertexArrayVertexBuffer(m_ID, layout, vertexBufferID, 0, numberOfComponents * sizeof(float));
 	
 	glVertexArrayAttribFormat(m_ID, layout, numberOfComponents, GL_FLOAT, GL_FALSE, 0);
 	glVertexArrayAttribBinding(m_ID, layout, layout);
 	glEnableVertexArrayAttrib(m_ID, layout);
 }
 
-void VertexArray::LinkElementBuffer(const ElementBuffer& elementBuffer)
+void VertexArray::LinkElementBuffer(GLuint elementBufferID)
 {
-	glVertexArrayElementBuffer(m_ID, elementBuffer.GetID());
+	glVertexArrayElementBuffer(m_ID, elementBufferID);
 }
 
 const void VertexArray::Bind() const

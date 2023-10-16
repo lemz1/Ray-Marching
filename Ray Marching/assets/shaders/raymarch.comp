@@ -11,10 +11,11 @@ uniform uint numSDFObjects;
 uniform uint numPointLights;
 uniform uint numDirectionalLights;
 
-uniform float verticalFOV;
-uniform float aspectRatio;
+
 uniform vec3 cameraOrigin;
-uniform vec3 cameraTarget;
+uniform vec3 cameraHorizontalComp;
+uniform vec3 cameraVerticalComp;
+uniform vec3 cameraBottomLeft;
 
 //const uint MAX_STEPS = 200;
 const float MAX_DISTANCE = 50;
@@ -249,23 +250,10 @@ void main()
     vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height);
     //uv.x *= float(width) / float(height);
 
-    float theta = (3.1415926 / 180.0) * verticalFOV;
-    float height = 2.0 * tan(theta / 2.0);
-    float width = height * aspectRatio;
-
-    vec3 y = vec3(0, 1, 0);
-    vec3 w = normalize(cameraOrigin - cameraTarget);
-    vec3 u = normalize(cross(y, w));
-    vec3 v = cross(w, u);
-
-    vec3 horizontalComp = width * u;
-    vec3 verticalComp = height * v;
-    vec3 bottomLeft = cameraOrigin - (horizontalComp / 2.0) - (verticalComp / 2.0) - w;
-
     Ray ray;
 
     ray.origin = cameraOrigin;
-    ray.direction = bottomLeft + uv.x * horizontalComp + uv.y * verticalComp - cameraOrigin;
+    ray.direction = cameraBottomLeft + (uv.x * cameraHorizontalComp) + (uv.y * cameraVerticalComp) - cameraOrigin;
 
     DirectionalLight light;
     light.direction = vec3(1, 1, 0);

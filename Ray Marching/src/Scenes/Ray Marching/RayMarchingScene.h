@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../Core/Scene.h"
-#include "../Utils/Shader.h"
-#include "../Utils/CameraController.h"
-#include "../Events/WindowResizeEventListener.h"
-#include "../Events/KeyboardEventListener.h"
-#include "../Objects/SDFObject.h"
-#include "../Objects/PointLight.h"
-#include "../Objects/DirectionalLight.h"
-#include "../BufferObjects/StorageBuffer.h"
+#include "../../Core/Scene.h"
+#include "../../Utils/Shader.h"
+#include "../../Utils/CameraController.h"
+#include "../../Events/WindowResizeEventListener.h"
+#include "../../Events/KeyboardEventListener.h"
+#include "../../Objects/SDFObject.h"
+#include "../../Objects/PointLight.h"
+#include "../../Objects/DirectionalLight.h"
+#include "../../BufferObjects/StorageBuffer.h"
 
 class RayMarchingScene : public Scene
 {
@@ -18,6 +18,8 @@ public:
 	void OnImGuiUpdate(double deltaTime) override;
 	void OnDestroy() override;
 private:
+	void RayMarch();
+	void TestRays();
 	void OnWindowResize(const WindowResizeEvent& event);
 	void OnKeyboard(const KeyboardEvent& event);
 private:

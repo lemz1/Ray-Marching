@@ -10,7 +10,7 @@ class CameraController
 public:
 	CameraController() = default;
 	CameraController(std::shared_ptr<Camera> camera)
-		: m_Camera(camera) 
+		: m_Camera(camera), m_LastMousePosition(glm::vec2(0))
 	{}
 
 	void OnUpdate(double deltaTime);

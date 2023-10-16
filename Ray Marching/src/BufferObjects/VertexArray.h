@@ -11,8 +11,8 @@ public:
 	VertexArray();
 	~VertexArray();
 
-	void LinkVertexBuffer(const VertexBuffer& vertexBuffer, GLuint layout, GLuint numberOfComponents);
-	void LinkElementBuffer(const ElementBuffer& elementBuffer);
+	void LinkVertexBuffer(GLuint vertexBufferID, GLuint layout, GLuint numberOfComponents);
+	void LinkElementBuffer(GLuint elementBufferID);
 	
 	const void Bind() const;
 	const void Unbind() const;

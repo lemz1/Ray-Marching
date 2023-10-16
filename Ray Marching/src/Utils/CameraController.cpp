@@ -22,7 +22,7 @@ void CameraController::MoveCamera(double deltaTime)
 {
 	Transform transform = m_Camera->GetTransform();
 
-	glm::vec3 upDirection = glm::vec3(0, 1, 0);
+	constexpr glm::vec3 upDirection = glm::vec3(0, 1, 0);
 	glm::vec3 rightDirection = glm::cross(transform.rotation, upDirection);
 
 	bool moved = false;
