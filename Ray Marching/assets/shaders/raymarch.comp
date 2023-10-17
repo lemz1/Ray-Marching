@@ -11,11 +11,10 @@ uniform uint numSDFObjects;
 uniform uint numPointLights;
 uniform uint numDirectionalLights;
 
+uniform mat4 inverseProjectionMatrix;
+uniform mat4 inverseViewMatrix;
 
 uniform vec3 cameraOrigin;
-uniform vec3 cameraHorizontalComp;
-uniform vec3 cameraVerticalComp;
-uniform vec3 cameraBottomLeft;
 
 //const uint MAX_STEPS = 200;
 const float MAX_DISTANCE = 50;
@@ -248,12 +247,13 @@ void main()
     }
 
     vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height);
-    //uv.x *= float(width) / float(height);
+    uv = uv * 2.0 - 1.0;
 
     Ray ray;
 
     ray.origin = cameraOrigin;
-    ray.direction = cameraBottomLeft + (uv.x * cameraHorizontalComp) + (uv.y * cameraVerticalComp) - cameraOrigin;
+    vec4 target = inverseProjectionMatrix * vec4(uv, 1.0, 1.0);
+    ray.direction = vec3(inverseViewMatrix * vec4(normalize(vec3(target) / target.w), 0));
 
     DirectionalLight light;
     light.direction = vec3(1, 1, 0);

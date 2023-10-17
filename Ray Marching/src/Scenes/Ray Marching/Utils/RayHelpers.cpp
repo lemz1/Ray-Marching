@@ -1,5 +1,6 @@
 #include "RayHelpers.h"
 
+// Unused Code leaving it here to remember this failure for calculating rays
 RayHelpers::CameraInfo RayHelpers::CalculateCameraInfo(std::shared_ptr<Camera> camera)
 {
 	Transform cameraTransform = camera->GetTransform();

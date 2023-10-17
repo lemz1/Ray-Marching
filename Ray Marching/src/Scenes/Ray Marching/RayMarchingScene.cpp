@@ -49,23 +49,6 @@ void RayMarchingScene::OnCreate()
 	m_SDFObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
 	m_PointLightsBuffer = new StorageBuffer(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight), 2);
 	m_DirectionalLightsBuffer = new StorageBuffer(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight), 3);
-
-	std::shared_ptr<Camera> cam = m_CameraController.GetCamera();
-	Transform camT = cam->GetTransform();
-
-	constexpr float pi = 3.1415926;
-	float theta = pi / 180.f * cam->GetVerticalFOV();
-	float height = 2.f * tan(theta / 2.f);
-	float width = height * ((float)cam->GetWidth() / (float)cam->GetHeight());
-
-	constexpr glm::vec3 y = glm::vec3(0, 1, 0);
-	glm::vec3 w = glm::normalize(camT.rotation);
-	glm::vec3 u = glm::normalize(glm::cross(y, w));
-	glm::vec3 v = glm::cross(w, u);
-
-	glm::vec3 horizontalComp = width * u;
-	glm::vec3 verticalComp = height * v;
-	glm::vec3 bottomLeft = camT.position - (horizontalComp / 2.f) - (verticalComp / 2.f) + w;
 }
 
 void RayMarchingScene::OnUpdate(double deltaTime)
@@ -121,6 +104,10 @@ void RayMarchingScene::RayMarch()
 		camT.position.y,
 		camT.position.z);
 
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(camera->GetInverseProjectionMatrix()));
+	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseViewMatrix"), 1, GL_FALSE, glm::value_ptr(camera->GetInverseViewMatrix()));
+
+	/* Unused Code (leaving it here just to remember this failure)
 	RayHelpers::CameraInfo cameraInfo = RayHelpers::CalculateCameraInfo(camera);
 
 	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraHorizontalComp"),
@@ -137,6 +124,7 @@ void RayMarchingScene::RayMarch()
 		cameraInfo.bottomLeft.x,
 		cameraInfo.bottomLeft.y,
 		cameraInfo.bottomLeft.z);
+	*/
 
 	m_SDFObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
@@ -162,6 +150,8 @@ void RayMarchingScene::RayMarch()
 
 void RayMarchingScene::TestRays()
 {
+	#if 0
+	// Unused Code leaving it here to remember this failure
 	RayHelpers::CameraInfo cameraInfo = RayHelpers::CalculateCameraInfo(m_CameraController.GetCamera());
 
 	constexpr int horizontal = 5;
@@ -184,6 +174,35 @@ void RayMarchingScene::TestRays()
 			quad.Draw();
 		}
 	}
+	#elif 1
+	std::shared_ptr<Camera> camera = m_CameraController.GetCamera();
+
+	constexpr int horizontal = 5;
+	constexpr int vertical = 5;
+	for (int y = 0; y <= vertical; y++)
+	{
+		for (int x = 0; x <= horizontal; x++)
+		{
+			glm::vec2 uv = glm::vec2((float)x / horizontal, (float)y / vertical);
+			uv = uv * 2.f - 1.f;
+
+			glm::vec4 target = camera->GetInverseProjectionMatrix() * glm::vec4(uv.x, uv.y, 1, 1);
+			glm::vec3 direction = glm::vec3(camera->GetInverseViewMatrix() * glm::vec4(glm::normalize(glm::vec3(target) / target.w), 0));
+
+			glm::vec3 position = camera->GetTransform().position + direction;
+
+			Quad quad = Quad(
+				Transform(
+					position,
+					glm::vec3(0),
+					glm::vec3(0.05f)
+				),
+				m_CameraController.GetCamera()
+			);
+			quad.Draw();
+		}
+	}
+	#endif
 }
 
 void RayMarchingScene::OnWindowResize(const WindowResizeEvent& event)
