@@ -61,7 +61,7 @@ const bool InputHandler::KeyIsReleased(int key)
 	return isReleased;
 }
 
-const glm::vec2& InputHandler::GetMousePosition()
+const glm::vec2 InputHandler::GetMousePosition()
 {
 	double positionX, positionY;
 	glfwGetCursorPos(s_Instance->m_Window, &positionX, &positionY);

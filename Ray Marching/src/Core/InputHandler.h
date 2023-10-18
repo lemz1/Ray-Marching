@@ -14,7 +14,7 @@ public:
 	static const bool KeyIsHeld(int key);
 	static const bool KeyIsReleased(int key);
 
-	static const glm::vec2& GetMousePosition();
+	static const glm::vec2 GetMousePosition();
 	static void CenterMousePosition();
 	static void LockCursor();
 	static void UnlockCursor();

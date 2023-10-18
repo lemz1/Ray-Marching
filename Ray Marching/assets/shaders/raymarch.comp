@@ -17,8 +17,8 @@ uniform mat4 inverseViewMatrix;
 uniform vec3 cameraOrigin;
 
 //const uint MAX_STEPS = 200;
-const float MAX_DISTANCE = 50;
-const float epsilon = 0.001;
+const float MAX_DISTANCE = 100;
+const float EPSILON = 0.001;
 
 // need this because using vec3 in the bufferobject
 // made the objects use more bytes than they should use
@@ -92,9 +92,14 @@ struct HitInfo
     float minDistance;
     float totalDistance;
     bool hit;
-    uint index;
     SDFObject object;
     vec3 surfacePoint;
+};
+
+struct SceneInfo 
+{
+    float distance;
+    int index;
 };
 
 SDFObject trashToObject(SDFObjectTrash trash) 
@@ -132,48 +137,35 @@ float sd_Torus(SDFObject torus, vec3 point)
     return length(q) - size.y;
 }
 
-vec3 calculateNormalSphere(SDFObject sphere, vec3 point) 
+SceneInfo sceneInfo(vec3 point) 
 {
-    return normalize(point - sphere.transform.position);
-}
+    SceneInfo sceneInfo;
+    sceneInfo.distance = MAX_DISTANCE;
+    sceneInfo.index = 0;
 
-vec3 calculateNormalBox(SDFObject box, vec3 point) 
-{
-    vec3 normal = vec3(0.0);
-    vec3 center = box.transform.position;
-    vec3 size = box.transform.scale;
-    vec3 p = (point - center) / size;
-    if (abs(p.x) > abs(p.y) && abs(p.x) > abs(p.z))
-        normal = vec3(sign(p.x), 0.0, 0.0);
-    else if (abs(p.y) > abs(p.z))
-        normal = vec3(0.0, sign(p.y), 0.0);
-    else
-        normal = vec3(0.0, 0.0, sign(p.z));
-    return normal;
-}
-
-vec3 calculateNormalTorus(SDFObject torus, vec3 point) 
-{
-    vec3 normal = vec3(0.0);
-    vec3 center = torus.transform.position;
-    vec3 size = torus.transform.scale;
-    vec3 p = point - center;
-    float r = length(p);
-    float theta = atan(p.y, p.x);
-    float phi = acos(p.z / r);
-    normal.x = cos(theta) * sin(phi);
-    normal.y = sin(theta) * sin(phi);
-    normal.z = cos(phi);
-    return normal;
-}
-
-
-vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Material material) 
-{
-    float dotNL = dot(normal, light.direction);
-    vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
-
-    return material.ambientColor + diffuse;
+    for (int i = 0; i < numSDFObjects; i++) 
+    {
+        SDFObject object = trashToObject(sdfObjects[i]);
+        float localDistance;
+        switch (object.type)
+        {
+            case 0: // Sphere
+                localDistance = sd_Sphere(object, point);
+                break;
+            case 1: // Box
+                localDistance = sd_Box(object, point);
+                break;
+            case 2: // Torus
+                localDistance = sd_Torus(object, point);
+                break;
+        }
+        if (localDistance < sceneInfo.distance) 
+        {
+            sceneInfo.distance = localDistance;
+            sceneInfo.index = i;
+        }
+    }
+    return sceneInfo;
 }
 
 HitInfo rayMarch(Ray ray) 
@@ -182,59 +174,51 @@ HitInfo rayMarch(Ray ray)
     hitInfo.totalDistance = 0.0;
     hitInfo.minDistance = MAX_DISTANCE;
     hitInfo.hit = false;
-    hitInfo.index = 0;
     
     while (hitInfo.totalDistance < MAX_DISTANCE)
     {
         vec3 point = ray.origin + ray.direction * hitInfo.totalDistance;
 
-        float d = MAX_DISTANCE;
+        SceneInfo sceneInfo = sceneInfo(point);
 
-        for (int j = 0; j < numSDFObjects; j++) 
+        if (sceneInfo.distance < EPSILON) 
         {
-            SDFObject object = trashToObject(sdfObjects[j]);
-            float localD;
-            switch (object.type)
-            {
-                case 0: // Sphere
-                    localD = sd_Sphere(object, point);
-                    break;
-                case 1: // Box
-                    localD = sd_Box(object, point);
-                    break;
-                case 2: // Torus
-                    localD = sd_Torus(object, point);
-                    break;
-            }
-            if (localD < d) 
-            {
-                d = localD;
-                hitInfo.index = j;
-                hitInfo.object = object;
-            }
-        }
-
-        if (d < epsilon) 
-        {
-            hitInfo.minDistance = d;
+            hitInfo.minDistance = sceneInfo.distance;
             hitInfo.hit = true;
             hitInfo.surfacePoint = point;
+            hitInfo.object = trashToObject(sdfObjects[sceneInfo.index]);
             break;
         }
 
-        hitInfo.totalDistance += d;
+        if (sceneInfo.distance < hitInfo.minDistance)
+        {
+            hitInfo.minDistance = sceneInfo.distance;
+        }
+
+        hitInfo.totalDistance += sceneInfo.distance;
         if (hitInfo.totalDistance > MAX_DISTANCE) 
         {
             break;
         }
-        
-        if (d < hitInfo.minDistance)
-        {
-            hitInfo.minDistance = d;
-        }
     }
 
     return hitInfo;
+}
+
+vec3 approximateNormal(vec3 point) 
+{
+    float x = sceneInfo(vec3(point.x + EPSILON, point.yz)).distance - sceneInfo(vec3(point.x - EPSILON, point.yz)).distance;
+    float y = sceneInfo(vec3(point.x, point.y + EPSILON, point.z)).distance - sceneInfo(vec3(point.x, point.y - EPSILON, point.z)).distance;
+    float z = sceneInfo(vec3(point.xy, point.z + EPSILON)).distance - sceneInfo(vec3(point.xy, point.z - EPSILON)).distance;
+    return normalize(vec3(x, y, z));
+}
+
+vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Material material) 
+{
+    float dotNL = dot(normal, light.direction);
+    vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
+
+    return material.ambientColor + diffuse;
 }
 
 void main()
@@ -246,8 +230,7 @@ void main()
         return;
     }
 
-    vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height);
-    uv = uv * 2.0 - 1.0;
+    vec2 uv = vec2(pixel_coords.x / width, pixel_coords.y / height) * 2.0 - 1.0;
 
     Ray ray;
 
@@ -263,28 +246,15 @@ void main()
 
     if (!hitInfo.hit) // return early if it didnt hit
     {
-        vec4 pixel;
-        pixel = vec4(0.0, 0.2, 0.5, 1.0);
+        vec4 pixel = vec4(0.1, 0.1, 0.1, 1.0);
         imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);
         return;
     }
     
-    vec3 normal;
-    switch (hitInfo.object.type)
-    {
-        case 0: // Sphere
-            normal = calculateNormalSphere(hitInfo.object, hitInfo.surfacePoint);
-            break;
-        case 1: // Box
-            normal = calculateNormalBox(hitInfo.object, hitInfo.surfacePoint);
-            break;
-        case 2: // Torus
-            normal = calculateNormalTorus(hitInfo.object, hitInfo.surfacePoint);
-            break;
-    }
+    vec3 normal = approximateNormal(hitInfo.surfacePoint - (ray.direction * EPSILON));
 
     vec3 viewDir = normalize(cameraOrigin - hitInfo.surfacePoint);
-    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.object.material); // Calculate the lighting
+    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.object.material);
     vec4 pixel = vec4(lighting, 1.0);
 
     imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);

@@ -4,14 +4,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../../Core/Application.h"
-
-#include "../../Debug/OpenGLDebug.h"
-
 #include "../../Core/InputHandler.h"
-
+#include "../../Debug/OpenGLDebug.h"
 #include "../../Objects/Quad.h"
-
-#include "Utils/RayHelpers.h"
 
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
@@ -28,22 +23,28 @@ void RayMarchingScene::OnCreate()
 		"assets/shaders/default.frag"
 	);
 
-	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, 3), glm::vec3(0, 0, -1)));
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 0, -3), glm::vec3(0, 0, 1)));
 
 	m_CameraController = CameraController(camera);
 
 	m_ComputeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
 	
 	m_Objects.push_back(SDFObject(
-		Transform(glm::vec3(-2, 0, -5)),
-		Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.25f, 0)),
+		Transform(glm::vec3(0, -2, 0)),
+		Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.25f, 0, 0)),
 		SDFObjectType::Box)
 	);
 
 	m_Objects.push_back(SDFObject(
-		Transform(glm::vec3(0, -3, 0), glm::vec3(0), glm::vec3(100, 1, 100)),
-		Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.25f, 0, 0)),
-		SDFObjectType::Box)
+		Transform(glm::vec3(-2, -2, 2)),
+		Material(glm::vec3(0, 0.1f, 0.2f), glm::vec3(0, 0.125f, 0.25f)),
+		SDFObjectType::Sphere)
+	);
+
+	m_Objects.push_back(SDFObject(
+		Transform(glm::vec3(-4, -3, 4), glm::vec3(0), glm::vec3(1, 0.3f, 1)),
+		Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.25f, 0)),
+		SDFObjectType::Torus)
 	);
 
 	m_SDFObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
@@ -107,25 +108,6 @@ void RayMarchingScene::RayMarch()
 	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(camera->GetInverseProjectionMatrix()));
 	glUniformMatrix4fv(glGetUniformLocation(m_ComputeShader->GetID(), "inverseViewMatrix"), 1, GL_FALSE, glm::value_ptr(camera->GetInverseViewMatrix()));
 
-	/* Unused Code (leaving it here just to remember this failure)
-	RayHelpers::CameraInfo cameraInfo = RayHelpers::CalculateCameraInfo(camera);
-
-	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraHorizontalComp"),
-		cameraInfo.horizontalComp.x,
-		cameraInfo.horizontalComp.y,
-		cameraInfo.horizontalComp.z);
-
-	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraVerticalComp"),
-		cameraInfo.verticalComp.x,
-		cameraInfo.verticalComp.y,
-		cameraInfo.verticalComp.z);
-
-	glUniform3f(glGetUniformLocation(m_ComputeShader->GetID(), "cameraBottomLeft"),
-		cameraInfo.bottomLeft.x,
-		cameraInfo.bottomLeft.y,
-		cameraInfo.bottomLeft.z);
-	*/
-
 	m_SDFObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
 	m_DirectionalLightsBuffer->SetData(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight));
@@ -150,31 +132,6 @@ void RayMarchingScene::RayMarch()
 
 void RayMarchingScene::TestRays()
 {
-	#if 0
-	// Unused Code leaving it here to remember this failure
-	RayHelpers::CameraInfo cameraInfo = RayHelpers::CalculateCameraInfo(m_CameraController.GetCamera());
-
-	constexpr int horizontal = 5;
-	constexpr int vertical = 5;
-	for (int y = 0; y <= vertical; y++)
-	{
-		for (int x = 0; x <= horizontal; x++)
-		{
-			glm::vec2 uv = glm::vec2((float)x / horizontal, (float)y / vertical);
-			glm::vec3 position = cameraInfo.bottomLeft + (cameraInfo.horizontalComp * uv.x) + (cameraInfo.verticalComp * uv.y);
-
-			Quad quad = Quad(
-				Transform(
-					position,
-					glm::vec3(0),
-					glm::vec3(0.05f)
-				),
-				m_CameraController.GetCamera()
-			);
-			quad.Draw();
-		}
-	}
-	#elif 1
 	std::shared_ptr<Camera> camera = m_CameraController.GetCamera();
 
 	constexpr int horizontal = 5;
@@ -194,7 +151,7 @@ void RayMarchingScene::TestRays()
 			Quad quad = Quad(
 				Transform(
 					position,
-					glm::vec3(0),
+					glm::vec3(0), // ignore the rotation
 					glm::vec3(0.05f)
 				),
 				m_CameraController.GetCamera()
@@ -202,7 +159,6 @@ void RayMarchingScene::TestRays()
 			quad.Draw();
 		}
 	}
-	#endif
 }
 
 void RayMarchingScene::OnWindowResize(const WindowResizeEvent& event)

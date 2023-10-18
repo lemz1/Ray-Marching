@@ -14,12 +14,12 @@ workspace "Ray Marching"
         targetdir("bin/"..outputdir.."/%{prj.name}")
         objdir("bin-int/"..outputdir.."/%{prj.name}")
 
-        files { "**.h", "**.cpp", "**.c" } -- this line sets the relative path to the source files
+        files { "**.h", "**.cpp", "**.c" }
 
-        includedirs {"Ray Marching/libraries/include"} -- this line sets the path to the include files
-        libdirs {"Ray Marching/libraries/lib"} -- this line sets the path to the library files
+        includedirs {"Ray Marching/libraries/include"}
+        libdirs {"Ray Marching/libraries/lib"} 
 
-        links {"glfw3"} -- this line links the GLFW library
+        links {"glfw3"}
 
         filter "configurations:Debug"
             defines { "DEBUG" }

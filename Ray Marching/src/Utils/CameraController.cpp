@@ -9,9 +9,8 @@
 
 #include "../Core/InputHandler.h"
 
-// thanks Cherno for some of the CameraController code (i took some of it from the Raytracing Series)
-
-#define BindEvent(eventCallback) std::bind(&CameraController::eventCallback, this, std::placeholders::_1)
+// thanks Cherno for some of the CameraController code (I took some of it from the Raytracing Series)
+// I just was too lazy
 
 void CameraController::OnUpdate(double deltaTime)
 {
