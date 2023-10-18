@@ -30,19 +30,19 @@ void RayMarchingScene::OnCreate()
 	m_ComputeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
 	
 	m_Objects.push_back(SDFObject(
-		Transform(glm::vec3(0, -2, 0)),
+		Transform(glm::vec3(-2, -1, 5)),
 		Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.25f, 0, 0)),
 		SDFObjectType::Box)
 	);
 
 	m_Objects.push_back(SDFObject(
-		Transform(glm::vec3(-2, -2, 2)),
+		Transform(glm::vec3(0, -1, 5)),
 		Material(glm::vec3(0, 0.1f, 0.2f), glm::vec3(0, 0.125f, 0.25f)),
 		SDFObjectType::Sphere)
 	);
 
 	m_Objects.push_back(SDFObject(
-		Transform(glm::vec3(-4, -3, 4), glm::vec3(0), glm::vec3(1, 0.3f, 1)),
+		Transform(glm::vec3(2, -2, 5), glm::vec3(0), glm::vec3(1, 0.3f, 1)),
 		Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.25f, 0)),
 		SDFObjectType::Torus)
 	);
@@ -76,6 +76,7 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 	ImGui::Text("Exit Scene: ESCAPE or BACKSPACE");
 	ImGui::Text("Enter Scene: SPACE or ENTER");
 	ImGui::Text("Capped FPS Off/On: V");
+	ImGui::Text("Movement: W, A, S, D, E, Q");
 	ImGui::End();
 }
 

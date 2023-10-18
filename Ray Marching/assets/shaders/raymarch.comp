@@ -92,14 +92,20 @@ struct HitInfo
     float minDistance;
     float totalDistance;
     bool hit;
-    SDFObject object;
+    Material material;
     vec3 surfacePoint;
+};
+
+struct BlendInfo 
+{
+    float distance;
+    Material material;
 };
 
 struct SceneInfo 
 {
     float distance;
-    int index;
+    Material material;
 };
 
 SDFObject trashToObject(SDFObjectTrash trash) 
@@ -137,32 +143,83 @@ float sd_Torus(SDFObject torus, vec3 point)
     return length(q) - size.y;
 }
 
+float getShapeDistance(SDFObject object, vec3 point) 
+{
+    float distance = MAX_DISTANCE;
+
+    switch (object.type)
+    {
+        case 0: // Sphere
+            distance = sd_Sphere(object, point);
+            break;
+        case 1: // Box
+            distance = sd_Box(object, point);
+            break;
+        case 2: // Torus
+            distance = sd_Torus(object, point);
+            break;
+    }
+
+    return distance;
+}
+
+float lerp(float a, float b, float t) 
+{
+    return a + ((b - a) * t);
+}
+
+vec3 lerp(vec3 a, vec3 b, float t) 
+{
+    return vec3(
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t),
+        lerp(a.z, b.z, t)
+    );
+}
+
+// https://www.iquilezles.org/www/articles/smin/smin.htm
+BlendInfo blendInfo(float distanceA, float distanceB, Material materialA, Material materialB, float k)
+{
+    BlendInfo blendInfo;
+
+    float h = clamp(0.5+0.5*(distanceB-distanceA)/k, 0.0, 1.0);
+    float blendDistance = lerp(distanceB, distanceA, h) - k*h*(1.0-h);
+    vec3 blendAmbientColor = lerp(materialB.ambientColor, materialA.ambientColor, h);
+    vec3 blendDiffuseColor = lerp(materialB.diffuseColor, materialA.diffuseColor, h);
+
+    blendInfo.distance = blendDistance;
+    blendInfo.material.ambientColor = blendAmbientColor;
+    blendInfo.material.diffuseColor = blendDiffuseColor;
+    return blendInfo;
+}
+
 SceneInfo sceneInfo(vec3 point) 
 {
     SceneInfo sceneInfo;
     sceneInfo.distance = MAX_DISTANCE;
-    sceneInfo.index = 0;
+    sceneInfo.material = Material(vec3(0.1), vec3(0.1));
 
     for (int i = 0; i < numSDFObjects; i++) 
     {
         SDFObject object = trashToObject(sdfObjects[i]);
-        float localDistance;
-        switch (object.type)
+        float localDistance = getShapeDistance(object, point);
+        Material localMaterial = object.material;
+
+        for (int j = i + 1; j < numSDFObjects; j++) 
         {
-            case 0: // Sphere
-                localDistance = sd_Sphere(object, point);
-                break;
-            case 1: // Box
-                localDistance = sd_Box(object, point);
-                break;
-            case 2: // Torus
-                localDistance = sd_Torus(object, point);
-                break;
+            SDFObject otherObject = trashToObject(sdfObjects[j]);
+            float otherDistance = getShapeDistance(otherObject, point);
+            Material otherMaterial = otherObject.material;
+
+            BlendInfo blendInfo = blendInfo(localDistance, otherDistance, localMaterial, otherMaterial, 1);
+            localDistance = blendInfo.distance;
+            localMaterial = blendInfo.material;
         }
+
         if (localDistance < sceneInfo.distance) 
         {
             sceneInfo.distance = localDistance;
-            sceneInfo.index = i;
+            sceneInfo.material = localMaterial;
         }
     }
     return sceneInfo;
@@ -185,8 +242,8 @@ HitInfo rayMarch(Ray ray)
         {
             hitInfo.minDistance = sceneInfo.distance;
             hitInfo.hit = true;
+            hitInfo.material = sceneInfo.material;
             hitInfo.surfacePoint = point;
-            hitInfo.object = trashToObject(sdfObjects[sceneInfo.index]);
             break;
         }
 
@@ -254,7 +311,7 @@ void main()
     vec3 normal = approximateNormal(hitInfo.surfacePoint - (ray.direction * EPSILON));
 
     vec3 viewDir = normalize(cameraOrigin - hitInfo.surfacePoint);
-    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.object.material);
+    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.material);
     vec4 pixel = vec4(lighting, 1.0);
 
     imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);
