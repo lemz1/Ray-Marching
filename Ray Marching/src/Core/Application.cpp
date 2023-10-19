@@ -45,7 +45,7 @@ EventHandler* InitializeEventHandler(GLFWwindow* window)
         EventHandler::TriggerEventListeners(EventType::WindowResize, event);
     });
 
-    /*glfwSetCursorPosCallback(window, [](GLFWwindow* window, double positionX, double positionY)
+    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double positionX, double positionY)
     {
         Event event;
         event.mousePositionX = positionX;
@@ -59,7 +59,7 @@ EventHandler* InitializeEventHandler(GLFWwindow* window)
         event.mouseButton = button;
         event.mouseAction = action;
         EventHandler::TriggerEventListeners(EventType::MouseButton, event);
-    });*/
+    });
 
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
     {
@@ -143,12 +143,11 @@ Application::Application(const char* title, uint32_t width, uint32_t height, Sce
         return;
     }
 
-    InitializeImGui(m_Window);
-
     m_EventHandler = InitializeEventHandler(m_Window);
     m_InputHandler = InitializeKeyboardInputHandler(m_Window);
     m_ViewportFrameBuffer = InitializeViewportFrameBuffer();
 
+    InitializeImGui(m_Window);
     AddScene(initialScene);
 }
 
@@ -209,8 +208,6 @@ void Application::Run()
 
         m_ViewportFrameBuffer->Unbind();
 
-        
-
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -219,12 +216,19 @@ void Application::Run()
         CreateDockSpace(io);
 
         // Display the ViewPortFrameBuffer
-        ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
         ImVec2 contentRegion = ImGui::GetContentRegionAvail();
         int imageWidth = contentRegion.x;
         int imageHeight = imageWidth / (16.f / 9.f);
 
+        if (imageHeight > contentRegion.y)
+        {
+            imageHeight = contentRegion.y;
+            imageWidth = imageHeight * (16.f / 9.f);
+        }
+
+        ImGui::SetCursorPos(ImVec2((contentRegion.x - imageWidth) / 2.0f, (contentRegion.y - imageHeight) / 2.0f));
         ImGui::Image(
             (void*)(intptr_t)m_ViewportFrameBuffer->GetTextureID(0),
             ImVec2(imageWidth, imageHeight),
