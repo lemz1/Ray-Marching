@@ -197,7 +197,6 @@ SceneInfo intersect(float distanceA, float distanceB, Material materialA, Materi
     if (distanceB > distanceA) 
     {
         intersectionInfo.distance = distanceB;
-        intersectionInfo.material = materialB;
     }
 
     return intersectionInfo;
@@ -218,33 +217,63 @@ SceneInfo substract(float distanceA, float distanceB, Material materialA, Materi
     return intersectionInfo;
 }
 
-SceneInfo combine(float distanceA, float distanceB, Material materialA, Material materialB, uint combineType, float blendStrength) 
+void setCombineDistance(inout float combineDistance, uint combineType) 
+{
+    switch (combineType) 
+    {
+        case 0: // none
+            combineDistance = 0;
+            break;
+        case 1: // blending 
+            // do nothing
+            break;
+        case 2: // intersection
+            combineDistance = MAX_DISTANCE;
+            break;
+        case 3: // substraction
+            combineDistance = 0;
+            break;
+    }
+}
+
+void combine(inout float combineDistance, inout Material combineMaterial, 
+             float distanceA, float distanceB, 
+             Material materialA, Material materialB, 
+             uint combineType, float blendStrength
+) 
 {
     SceneInfo sceneInfo;
-    sceneInfo.distance = distanceA;
-    sceneInfo.material = materialA;
-
     switch (combineType) 
     {
         case 0: // none
             if (distanceB < distanceA) 
             {
-                sceneInfo.distance = distanceB;
-                sceneInfo.material = materialB;
+                combineDistance = distanceB;
+                combineMaterial = materialB;
             }
             break;
         case 1: // blending
-            sceneInfo = blend(distanceA, distanceB, materialA, materialB, blendStrength);
+            sceneInfo = blend(combineDistance, distanceB, combineMaterial, materialB, blendStrength);
+            combineDistance = sceneInfo.distance;
+            combineMaterial = sceneInfo.material;
             break;
         case 2: // intersection
             sceneInfo = intersect(distanceA, distanceB, materialA, materialB);
+            if (sceneInfo.distance < combineDistance) 
+            {
+                combineDistance = sceneInfo.distance;
+                combineMaterial = sceneInfo.material;
+            }
             break;
         case 3: // susbstraction
             sceneInfo = substract(distanceA, distanceB, materialA, materialB);
+            if (sceneInfo.distance > combineDistance) 
+            {
+                combineDistance = sceneInfo.distance;
+                combineMaterial = materialA;
+            }
             break;
     }
-
-    return sceneInfo;
 }
 
 SceneInfo sceneInfo(vec3 point) 
@@ -259,16 +288,21 @@ SceneInfo sceneInfo(vec3 point)
         float localDistance = getShapeDistance(object, point);
         Material localMaterial = object.material;
 
+        uint combineType = 3;
+
+        float combineDistance = localDistance;
+        setCombineDistance(combineDistance, combineType);
+        Material combineMaterial = localMaterial;
         for (int j = i + 1; j < numSDFObjects; j++) 
         {
             SDFObject otherObject = trashToObject(sdfObjects[j]);
             float otherDistance = getShapeDistance(otherObject, point);
             Material otherMaterial = otherObject.material;
 
-            SceneInfo combineInfo = combine(localDistance, otherDistance, localMaterial, otherMaterial, 1, otherObject.blendStrength);
-            localDistance = combineInfo.distance;
-            localMaterial = combineInfo.material;
+            combine(combineDistance, combineMaterial, localDistance, otherDistance, localMaterial, otherMaterial, combineType, otherObject.blendStrength);
         }
+        localDistance = combineDistance;
+        localMaterial = combineMaterial;
         i += int(numSDFObjects);
 
         if (localDistance < sceneInfo.distance) 
