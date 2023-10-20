@@ -1,6 +1,7 @@
 #include "VertexArray.h"
 
 VertexArray::VertexArray()
+	: m_ID(0)
 {
 	glCreateVertexArrays(1, &m_ID);
 }

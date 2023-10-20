@@ -1,6 +1,7 @@
 #include "ElementBuffer.h"
 
 ElementBuffer::ElementBuffer(const void* indices, GLsizeiptr size)
+	: m_ID(0)
 {
 	glCreateBuffers(1, &m_ID);
 	glNamedBufferData(m_ID, size, indices, GL_STATIC_DRAW);

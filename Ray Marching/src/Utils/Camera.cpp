@@ -56,7 +56,7 @@ void Camera::RecalculateCameraToWorldMatrix()
 		0, 0, 0, 1
 	);
 
-	const float PI = 3.1415926;
+	const float PI = 3.1415926f;
 	float roll = m_Transform.rotation.x * PI / 180.f;
 	float pitch = m_Transform.rotation.y * PI / 180.f;
 	float yaw = m_Transform.rotation.z * PI / 180.f;

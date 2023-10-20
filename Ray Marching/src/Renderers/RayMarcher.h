@@ -14,10 +14,10 @@ class RayMarcher
 {
 public:
 	static RayMarcher* Create(
-		std::shared_ptr<Shader> computeShader, 
+		std::shared_ptr<Shader> computeShader,
 		std::shared_ptr<Camera> camera,
 		const std::vector<SDFObject>& objects = std::vector<SDFObject>(),
-		const std::vector<PointLight>& pointLights = std::vector<PointLight>(), 
+		const std::vector<PointLight>& pointLights = std::vector<PointLight>(),
 		const std::vector<DirectionalLight>& directionalLights = std::vector<DirectionalLight>()
 	);
 	~RayMarcher();
@@ -46,13 +46,13 @@ private:
 	std::shared_ptr<Shader> m_ComputeShader;
 	std::shared_ptr<Camera> m_Camera;
 
-	float m_BlendStrength;
+	float m_BlendStrength = 0;
 
 	std::vector<SDFObject> m_Objects;
 	std::vector<PointLight> m_PointLights;
 	std::vector<DirectionalLight> m_DirectionalLights;
 
-	StorageBuffer* m_ObjectsBuffer;
-	StorageBuffer* m_PointLightsBuffer;
-	StorageBuffer* m_DirectionalLightsBuffer;
+	StorageBuffer* m_ObjectsBuffer = nullptr;
+	StorageBuffer* m_PointLightsBuffer = nullptr;
+	StorageBuffer* m_DirectionalLightsBuffer = nullptr;
 };

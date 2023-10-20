@@ -219,8 +219,8 @@ void Application::Run()
         ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
         ImVec2 contentRegion = ImGui::GetContentRegionAvail();
-        int imageWidth = contentRegion.x;
-        int imageHeight = imageWidth / (16.f / 9.f);
+        float imageWidth = contentRegion.x;
+        float imageHeight = imageWidth / (16.f / 9.f);
 
         if (imageHeight > contentRegion.y)
         {

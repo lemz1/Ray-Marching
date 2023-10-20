@@ -1,7 +1,7 @@
 #include "StorageBuffer.h"
 
 StorageBuffer::StorageBuffer(const void* data, GLsizeiptr size, GLuint index)
-	: m_Index(index)
+	: m_ID(0), m_Index(index)
 {
 	glCreateBuffers(1, &m_ID);
 	SetData(data, size);

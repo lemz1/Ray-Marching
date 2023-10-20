@@ -1,6 +1,7 @@
 #include "VertexBuffer.h"
 
 VertexBuffer::VertexBuffer(const void* vertices, GLsizeiptr size)
+	: m_ID(0)
 {
 	glCreateBuffers(1, &m_ID);
 	glNamedBufferData(m_ID, size, vertices, GL_STATIC_DRAW);

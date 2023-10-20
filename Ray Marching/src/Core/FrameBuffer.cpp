@@ -49,6 +49,7 @@ void FrameBuffer::CreateRenderBuffer(GLuint* renderBufferID, const RenderBufferS
 }
 
 FrameBuffer::FrameBuffer()
+	: m_ID(0)
 {
 	glCreateFramebuffers(1, &m_ID);
 }
@@ -72,7 +73,7 @@ void FrameBuffer::AddTexture(const TextureSpecification& spec)
 {
 	GLuint textureID;
 	
-	CreateTexture(&textureID, spec, m_TextureIDs.size());
+	CreateTexture(&textureID, spec, static_cast<uint32_t>(m_TextureIDs.size()));
 
 	m_TextureIDs.push_back(textureID);
 	m_TextureSpecifications.push_back(spec);
@@ -83,7 +84,7 @@ void FrameBuffer::AddRenderBuffer(const RenderBufferSpecification& spec)
 {
 	GLuint renderBufferID;
 
-	CreateRenderBuffer(&renderBufferID, spec, m_RenderBufferIDs.size());
+	CreateRenderBuffer(&renderBufferID, spec, static_cast<uint32_t>(m_RenderBufferIDs.size()));
 
 	m_RenderBufferIDs.push_back(renderBufferID);
 	m_RenderBufferSpecifications.push_back(spec);

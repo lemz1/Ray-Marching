@@ -35,13 +35,13 @@ public:
 private:
 	static Application* s_Instance;
 
-	GLFWwindow* m_Window;
-	EventHandler* m_EventHandler;
-	InputHandler* m_InputHandler;
+	GLFWwindow* m_Window = nullptr;
+	EventHandler* m_EventHandler = nullptr;
+	InputHandler* m_InputHandler = nullptr;
 
-	FrameBuffer* m_ViewportFrameBuffer;
+	FrameBuffer* m_ViewportFrameBuffer = nullptr;
 
-	double m_LastUpdateTime;
+	double m_LastUpdateTime = 0;
 
 	std::vector<Scene*> m_Scenes;
 };

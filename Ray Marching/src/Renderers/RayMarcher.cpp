@@ -58,9 +58,9 @@ void RayMarcher::Render()
 	glUniform1ui(glGetUniformLocation(computeShaderID, "width"), spec.width);
 	glUniform1ui(glGetUniformLocation(computeShaderID, "height"), spec.height);
 
-	glUniform1ui(glGetUniformLocation(computeShaderID, "numSDFObjects"), m_Objects.size());
-	glUniform1ui(glGetUniformLocation(computeShaderID, "numPointLights"), m_PointLights.size());
-	glUniform1ui(glGetUniformLocation(computeShaderID, "numDirectionalLights"), m_DirectionalLights.size());
+	glUniform1ui(glGetUniformLocation(computeShaderID, "numSDFObjects"), static_cast<GLuint>(m_Objects.size()));
+	glUniform1ui(glGetUniformLocation(computeShaderID, "numPointLights"), static_cast<GLuint>(m_PointLights.size()));
+	glUniform1ui(glGetUniformLocation(computeShaderID, "numDirectionalLights"), static_cast<GLuint>(m_DirectionalLights.size()));
 
 	Transform camT = m_Camera->GetTransform();
 	glUniform3f(glGetUniformLocation(computeShaderID, "cameraOrigin"),
@@ -81,8 +81,8 @@ void RayMarcher::Render()
 
 	glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 	glDispatchCompute(
-		ceil((float)spec.width / 16.f),
-		ceil((float)spec.height / 16.f),
+		static_cast<GLuint>(ceil((float)spec.width / 16.f)),
+		static_cast<GLuint>(ceil((float)spec.height / 16.f)),
 		1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

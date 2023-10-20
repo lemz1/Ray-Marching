@@ -12,6 +12,6 @@ enum TextureFormat
 
 struct TextureSpecification
 {
-	uint32_t width, height;
+	uint32_t width, height = 0;
 	TextureFormat format = TextureFormat::RGBA8;
 };
