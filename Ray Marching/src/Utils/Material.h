@@ -5,9 +5,9 @@
 struct Material
 {
 public:
-	Material(glm::vec3 ambientColor = glm::vec3(0.2f), glm::vec3 diffuseColor = glm::vec3(0.8f))
-		: ambientColor(ambientColor), diffuseColor(diffuseColor)
+	Material(glm::vec3 diffuseColor = glm::vec3(1))
+		: diffuseColor(diffuseColor)
 	{}
 
-	glm::vec3 ambientColor, diffuseColor;
+	glm::vec3 diffuseColor;
 };

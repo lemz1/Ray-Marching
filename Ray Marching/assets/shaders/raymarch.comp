@@ -27,9 +27,9 @@ struct SDFObjectTrash
     float position[3];
     float rotation[3];
     float scale[3];
-    float ambientColor[3];
     float diffuseColor[3];
     uint type; // 0 Sphere, 1 Box, 2 Torus
+    float blendStrength;
 };
 
 struct PointLight
@@ -70,7 +70,6 @@ struct Transform
 
 struct Material 
 {
-    vec3 ambientColor;
     vec3 diffuseColor;
 };
 
@@ -79,6 +78,7 @@ struct SDFObject
     Transform transform;
     Material material;
     uint type; // 0 Sphere, 1 Box, 2 Torus
+    float blendStrength;
 };
 
 struct Ray 
@@ -96,12 +96,6 @@ struct HitInfo
     vec3 surfacePoint;
 };
 
-struct BlendInfo 
-{
-    float distance;
-    Material material;
-};
-
 struct SceneInfo 
 {
     float distance;
@@ -114,9 +108,9 @@ SDFObject trashToObject(SDFObjectTrash trash)
     object.transform.position = vec3(trash.position[0], trash.position[1], trash.position[2]);
     object.transform.rotation = vec3(trash.rotation[0], trash.rotation[1], trash.rotation[2]);
     object.transform.scale = vec3(trash.scale[0], trash.scale[1], trash.scale[2]);
-    object.material.ambientColor = vec3(trash.ambientColor[0], trash.ambientColor[1], trash.ambientColor[2]);
     object.material.diffuseColor = vec3(trash.diffuseColor[0], trash.diffuseColor[1], trash.diffuseColor[2]);
     object.type = trash.type;
+    object.blendStrength = trash.blendStrength;
     return object;
 }
 
@@ -181,26 +175,83 @@ vec3 lerp(vec3 a, vec3 b, float t)
 }
 
 // https://www.iquilezles.org/www/articles/smin/smin.htm
-BlendInfo blendInfo(float distanceA, float distanceB, Material materialA, Material materialB, float k)
+SceneInfo blend(float distanceA, float distanceB, Material materialA, Material materialB, float k)
 {
-    BlendInfo blendInfo;
+    SceneInfo blendInfo;
 
     float h = clamp(0.5+0.5*(distanceB-distanceA)/k, 0.0, 1.0);
     float blendDistance = lerp(distanceB, distanceA, h) - k*h*(1.0-h);
-    vec3 blendAmbientColor = lerp(materialB.ambientColor, materialA.ambientColor, h);
     vec3 blendDiffuseColor = lerp(materialB.diffuseColor, materialA.diffuseColor, h);
 
     blendInfo.distance = blendDistance;
-    blendInfo.material.ambientColor = blendAmbientColor;
     blendInfo.material.diffuseColor = blendDiffuseColor;
     return blendInfo;
+}
+
+SceneInfo intersect(float distanceA, float distanceB, Material materialA, Material materialB) 
+{
+    SceneInfo intersectionInfo;
+    intersectionInfo.distance = distanceA;
+    intersectionInfo.material = materialB;
+
+    if (distanceB > distanceA) 
+    {
+        intersectionInfo.distance = distanceB;
+        intersectionInfo.material = materialB;
+    }
+
+    return intersectionInfo;
+}
+
+SceneInfo substract(float distanceA, float distanceB, Material materialA, Material materialB) 
+{
+    SceneInfo intersectionInfo;
+    intersectionInfo.distance = distanceA;
+    intersectionInfo.material = materialA;
+
+    if (-distanceB > distanceA) 
+    {
+        intersectionInfo.distance = -distanceB;
+        intersectionInfo.material = materialB;
+    }
+
+    return intersectionInfo;
+}
+
+SceneInfo combine(float distanceA, float distanceB, Material materialA, Material materialB, uint combineType, float blendStrength) 
+{
+    SceneInfo sceneInfo;
+    sceneInfo.distance = distanceA;
+    sceneInfo.material = materialA;
+
+    switch (combineType) 
+    {
+        case 0: // none
+            if (distanceB < distanceA) 
+            {
+                sceneInfo.distance = distanceB;
+                sceneInfo.material = materialB;
+            }
+            break;
+        case 1: // blending
+            sceneInfo = blend(distanceA, distanceB, materialA, materialB, blendStrength);
+            break;
+        case 2: // intersection
+            sceneInfo = intersect(distanceA, distanceB, materialA, materialB);
+            break;
+        case 3: // susbstraction
+            sceneInfo = substract(distanceA, distanceB, materialA, materialB);
+            break;
+    }
+
+    return sceneInfo;
 }
 
 SceneInfo sceneInfo(vec3 point) 
 {
     SceneInfo sceneInfo;
     sceneInfo.distance = MAX_DISTANCE;
-    sceneInfo.material = Material(vec3(0.1), vec3(0.1));
+    sceneInfo.material = Material(vec3(0.1));
 
     for (int i = 0; i < numSDFObjects; i++) 
     {
@@ -214,10 +265,11 @@ SceneInfo sceneInfo(vec3 point)
             float otherDistance = getShapeDistance(otherObject, point);
             Material otherMaterial = otherObject.material;
 
-            BlendInfo blendInfo = blendInfo(localDistance, otherDistance, localMaterial, otherMaterial, 1);
-            localDistance = blendInfo.distance;
-            localMaterial = blendInfo.material;
+            SceneInfo combineInfo = combine(localDistance, otherDistance, localMaterial, otherMaterial, 1, otherObject.blendStrength);
+            localDistance = combineInfo.distance;
+            localMaterial = combineInfo.material;
         }
+        i += int(numSDFObjects);
 
         if (localDistance < sceneInfo.distance) 
         {
@@ -278,8 +330,12 @@ vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Materi
     float dotNL = dot(normal, light.direction);
     vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
 
-    return material.ambientColor + diffuse;
+    float ambientStrength = 0.2;
+    vec3 ambient = ambientStrength * material.diffuseColor;
+
+    return ambient + diffuse;
 }
+
 
 void main()
 {

@@ -26,6 +26,9 @@ public:
 	void AddPointLight(const PointLight& pointLight);
 	void AddDirectionalLight(const DirectionalLight& directionalLight);
 
+	const float GetBlendStrength() const { return m_BlendStrength; }
+	void SetBlendStrength(float blendStrength) { m_BlendStrength = glm::clamp(blendStrength, 0.f, 1.f); }
+
 	const std::vector<SDFObject>& GetObjects() const { return m_Objects; }
 	std::vector<SDFObject>& GetObjects() { return m_Objects; }
 
@@ -42,6 +45,8 @@ private:
 private:
 	std::shared_ptr<Shader> m_ComputeShader;
 	std::shared_ptr<Camera> m_Camera;
+
+	float m_BlendStrength;
 
 	std::vector<SDFObject> m_Objects;
 	std::vector<PointLight> m_PointLights;

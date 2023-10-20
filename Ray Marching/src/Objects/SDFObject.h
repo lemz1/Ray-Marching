@@ -13,11 +13,12 @@ enum SDFObjectType
 struct SDFObject
 {
 public:
-	SDFObject(const Transform& transform = Transform(), const Material& material = Material(), SDFObjectType type = SDFObjectType::Sphere)
-		: transform(transform), material(material), type(type)
+	SDFObject(const Transform& transform = Transform(), const Material& material = Material(), SDFObjectType type = SDFObjectType::Sphere, float blendStrength = 0.1f)
+		: transform(transform), material(material), type(type), blendStrength(blendStrength)
 	{}
 
 	Transform transform;
 	Material material;
 	SDFObjectType type;
+	float blendStrength;
 };

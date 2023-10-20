@@ -33,20 +33,23 @@ void RayMarchingScene::OnCreate()
 	std::vector<SDFObject> objects = std::vector<SDFObject>();
 	objects.push_back(SDFObject(
 		Transform(glm::vec3(2, 0, 5)),
-		Material(glm::vec3(0.2f, 0, 0), glm::vec3(0.25f, 0, 0)),
-		SDFObjectType::Box)
+		Material(glm::vec3(0.5f, 0, 0)),
+		SDFObjectType::Box,
+		1)
 	);
 
 	objects.push_back(SDFObject(
 		Transform(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(1, 0, 0)),
-		Material(glm::vec3(0, 0.1f, 0.2f), glm::vec3(0, 0.125f, 0.25f)),
-		SDFObjectType::Sphere)
+		Material(glm::vec3(0, 0.25f, 0.5f)),
+		SDFObjectType::Sphere,
+		1)
 	);
 
 	objects.push_back(SDFObject(
 		Transform(glm::vec3(-2, 0, 5), glm::vec3(0), glm::vec3(4, 0.3f, 0)),
-		Material(glm::vec3(0, 0.2f, 0), glm::vec3(0, 0.25f, 0)),
-		SDFObjectType::Torus)
+		Material(glm::vec3(0, 0.5f, 0)),
+		SDFObjectType::Torus,
+		1)
 	);
 
 	m_RayMarcher = RayMarcher::Create(computeShader, camera, objects);
@@ -94,8 +97,10 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 	if (s_SelectedObjectIndex != -1)
 	{
 		SDFObject* object = &m_RayMarcher->GetObjects().at(s_SelectedObjectIndex);
-		ImGui::DragFloat3("Position", &object->transform.position.x, 0.025f);
-		ImGui::DragFloat3("Scale", &object->transform.scale.x, 0.01f);
+		ImGui::DragFloat3("Position", glm::value_ptr(object->transform.position), 0.025f);
+		ImGui::DragFloat3("Scale", glm::value_ptr(object->transform.scale), 0.01f, 0.01f, FLT_MAX);
+		ImGui::DragFloat("Blend Strength", &object->blendStrength, 0.01f, 0.f, 1.f);
+		ImGui::ColorPicker3("Color", glm::value_ptr(object->material.diffuseColor));
 	}
 	ImGui::End();
 }
