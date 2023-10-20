@@ -9,6 +9,7 @@ workspace "Ray Marching"
         location "Ray Marching"
         kind "ConsoleApp"
         language "C++"
+        cppdialect "C++20"
 
         targetdir("bin/"..outputdir.."/%{prj.name}")
         objdir("bin-int/"..outputdir.."/%{prj.name}")
