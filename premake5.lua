@@ -6,10 +6,10 @@ workspace "Ray Marching"
     outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
     project "Ray Marching"
-        location "Ray Marching" -- this line sets the location for the generated project files
+        location "Ray Marching"
         kind "ConsoleApp"
         language "C++"
-	cppdialect "C++20"
+	    cppdialect "C++20"
 
         targetdir("bin/"..outputdir.."/%{prj.name}")
         objdir("bin-int/"..outputdir.."/%{prj.name}")
