@@ -291,7 +291,10 @@ SceneInfo sceneInfo(vec3 point)
         uint combineType = 3;
 
         float combineDistance = localDistance;
-        setCombineDistance(combineDistance, combineType);
+        if (int(numSDFObjects) - 1 > 0) 
+        {
+            setCombineDistance(combineDistance, combineType);
+        }
         Material combineMaterial = localMaterial;
         for (int j = i + 1; j < numSDFObjects; j++) 
         {
