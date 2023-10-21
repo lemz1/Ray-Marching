@@ -7,7 +7,7 @@
 RayMarcher* RayMarcher::Create(
 	std::shared_ptr<Shader> computeShader,
 	std::shared_ptr<Camera> camera,
-	const std::vector<SDFObject>& objects, 
+	const std::vector<ComputeRaymarchObject>& objects, 
 	const std::vector<PointLight>& pointLights, 
 	const std::vector<DirectionalLight>& directionalLights
 )
@@ -29,10 +29,10 @@ RayMarcher::~RayMarcher()
 	DeleteBuffers();
 }
 
-void RayMarcher::AddObject(const SDFObject& object)
+void RayMarcher::AddObject(const ComputeRaymarchObject& object)
 {
 	m_Objects.push_back(object);
-	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
+	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(ComputeRaymarchObject));
 }
 
 void RayMarcher::AddPointLight(const PointLight& pointLight)
@@ -71,7 +71,7 @@ void RayMarcher::Render()
 	glUniformMatrix4fv(glGetUniformLocation(computeShaderID, "inverseProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(m_Camera->GetInverseProjectionMatrix()));
 	glUniformMatrix4fv(glGetUniformLocation(computeShaderID, "inverseViewMatrix"), 1, GL_FALSE, glm::value_ptr(m_Camera->GetInverseViewMatrix()));
 
-	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(SDFObject));
+	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(ComputeRaymarchObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
 	m_DirectionalLightsBuffer->SetData(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight));
 
@@ -81,7 +81,7 @@ void RayMarcher::Render()
 
 	glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 	glDispatchCompute(
-		static_cast<GLuint>(ceil((float)spec.width / 16.f)),
+		static_cast<GLuint>(ceil((float)spec.width / 32.f)),
 		static_cast<GLuint>(ceil((float)spec.height / 16.f)),
 		1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -95,7 +95,7 @@ void RayMarcher::Render()
 
 void RayMarcher::CreateBuffers()
 {
-	m_ObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(SDFObject), 1);
+	m_ObjectsBuffer = new StorageBuffer(m_Objects.data(), m_Objects.size() * sizeof(ComputeRaymarchObject), 1);
 	m_PointLightsBuffer = new StorageBuffer(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight), 2);
 	m_DirectionalLightsBuffer = new StorageBuffer(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight), 3);
 }

@@ -8,7 +8,7 @@
 #include "../../Core/Application.h"
 #include "../../Core/InputHandler.h"
 #include "../../Debug/OpenGLDebug.h"
-#include "../../Objects/SDFObject.h"
+#include "../../Objects/ComputeRaymarchObject.h"
 
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
@@ -30,25 +30,25 @@ void RayMarchingScene::OnCreate()
 
 	std::shared_ptr<Shader> computeShader = Shader::CreateComputeShader("assets/shaders/raymarch.comp");
 	
-	std::vector<SDFObject> objects = std::vector<SDFObject>();
-	objects.push_back(SDFObject(
+	std::vector<ComputeRaymarchObject> objects = std::vector<ComputeRaymarchObject>();
+	objects.push_back(ComputeRaymarchObject(
 		Transform(glm::vec3(2, 0, 5)),
 		Material(glm::vec3(0.5f, 0, 0)),
-		SDFObjectType::Box,
+		RaymarchObjectType::Box,
 		1)
 	);
 
-	objects.push_back(SDFObject(
+	objects.push_back(ComputeRaymarchObject(
 		Transform(glm::vec3(0, 0, 5), glm::vec3(0), glm::vec3(1, 0, 0)),
 		Material(glm::vec3(0, 0.25f, 0.5f)),
-		SDFObjectType::Sphere,
+		RaymarchObjectType::Sphere,
 		1)
 	);
 
-	objects.push_back(SDFObject(
+	objects.push_back(ComputeRaymarchObject(
 		Transform(glm::vec3(-2, 0, 5), glm::vec3(0), glm::vec3(4, 0.3f, 0)),
 		Material(glm::vec3(0, 0.5f, 0)),
-		SDFObjectType::Torus,
+		RaymarchObjectType::Torus,
 		1)
 	);
 
@@ -96,7 +96,7 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 	ImGui::Begin("Data");
 	if (s_SelectedObjectIndex != -1)
 	{
-		SDFObject* object = &m_RayMarcher->GetObjects().at(s_SelectedObjectIndex);
+		ComputeRaymarchObject* object = &m_RayMarcher->GetObjects().at(s_SelectedObjectIndex);
 		ImGui::DragFloat3("Position", glm::value_ptr(object->transform.position), 0.025f);
 		ImGui::DragFloat3("Scale", glm::value_ptr(object->transform.scale), 0.01f, 0.01f, FLT_MAX);
 		ImGui::DragFloat("Blend Strength", &object->blendStrength, 0.01f, 0.f, 1.f);

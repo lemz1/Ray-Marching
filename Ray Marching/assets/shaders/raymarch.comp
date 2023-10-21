@@ -1,6 +1,6 @@
 #version 460 core
 
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout (local_size_x = 32, local_size_y = 16, local_size_z = 1) in;
 
 layout (rgba8, binding = 0) uniform image2D img_output;
 
@@ -22,7 +22,7 @@ const float EPSILON = 0.001;
 
 // need this because using vec3 in the bufferobject
 // made the objects use more bytes than they should use
-struct SDFObjectTrash 
+struct RaymarchObjectTrash 
 {
     float position[3];
     float rotation[3];
@@ -46,9 +46,9 @@ struct DirectionalLight
     vec3 color;
 };
 
-layout(std430, binding = 1) buffer SDFObjectsBuffer
+layout(std430, binding = 1) buffer RaymarchObjectsBuffer
 {
-    SDFObjectTrash sdfObjects[];
+    RaymarchObjectTrash raymarchObjects[];
 };
 
 layout(std430, binding = 2) buffer PointLightsBuffer
@@ -73,7 +73,7 @@ struct Material
     vec3 diffuseColor;
 };
 
-struct SDFObject 
+struct ComputeRaymarchObject 
 {
     Transform transform;
     Material material;
@@ -102,9 +102,9 @@ struct SceneInfo
     Material material;
 };
 
-SDFObject trashToObject(SDFObjectTrash trash) 
+ComputeRaymarchObject trashToObject(RaymarchObjectTrash trash) 
 {
-    SDFObject object;
+    ComputeRaymarchObject object;
     object.transform.position = vec3(trash.position[0], trash.position[1], trash.position[2]);
     object.transform.rotation = vec3(trash.rotation[0], trash.rotation[1], trash.rotation[2]);
     object.transform.scale = vec3(trash.scale[0], trash.scale[1], trash.scale[2]);
@@ -114,7 +114,7 @@ SDFObject trashToObject(SDFObjectTrash trash)
     return object;
 }
 
-float sd_Sphere(SDFObject sphere, vec3 point) 
+float sd_Sphere(ComputeRaymarchObject sphere, vec3 point) 
 {
     vec3 center = sphere.transform.position;
     float radius = sphere.transform.scale.x;
@@ -122,7 +122,7 @@ float sd_Sphere(SDFObject sphere, vec3 point)
     return length(p) - radius;
 }
 
-float sd_Box(SDFObject box, vec3 point) 
+float sd_Box(ComputeRaymarchObject box, vec3 point) 
 {
     vec3 center = box.transform.position;
     vec3 size = box.transform.scale;
@@ -131,7 +131,7 @@ float sd_Box(SDFObject box, vec3 point)
     return min(max(q.x,max(q.y,q.z)),0.0) + length(max(q,0.0));
 }
 
-float sd_Torus(SDFObject torus, vec3 point) 
+float sd_Torus(ComputeRaymarchObject torus, vec3 point) 
 {
     vec3 center = torus.transform.position;
     vec2 size = torus.transform.scale.xy;
@@ -140,7 +140,7 @@ float sd_Torus(SDFObject torus, vec3 point)
     return length(q) - size.y;
 }
 
-float getShapeDistance(SDFObject object, vec3 point) 
+float getShapeDistance(ComputeRaymarchObject object, vec3 point) 
 {
     float distance = MAX_DISTANCE;
 
@@ -284,7 +284,7 @@ SceneInfo sceneInfo(vec3 point)
 
     for (int i = 0; i < numSDFObjects; i++) 
     {
-        SDFObject object = trashToObject(sdfObjects[i]);
+        ComputeRaymarchObject object = trashToObject(raymarchObjects[i]);
         float localDistance = getShapeDistance(object, point);
         Material localMaterial = object.material;
 
@@ -298,7 +298,7 @@ SceneInfo sceneInfo(vec3 point)
         Material combineMaterial = localMaterial;
         for (int j = i + 1; j < numSDFObjects; j++) 
         {
-            SDFObject otherObject = trashToObject(sdfObjects[j]);
+            ComputeRaymarchObject otherObject = trashToObject(raymarchObjects[j]);
             float otherDistance = getShapeDistance(otherObject, point);
             Material otherMaterial = otherObject.material;
 

@@ -5,7 +5,7 @@
 
 #include "../Utils/Shader.h"
 #include "../Utils/Camera.h"
-#include "../Objects/SDFObject.h"
+#include "../Objects/ComputeRaymarchObject.h"
 #include "../Objects/PointLight.h"
 #include "../Objects/DirectionalLight.h"
 #include "../BufferObjects/StorageBuffer.h"
@@ -16,21 +16,21 @@ public:
 	static RayMarcher* Create(
 		std::shared_ptr<Shader> computeShader,
 		std::shared_ptr<Camera> camera,
-		const std::vector<SDFObject>& objects = std::vector<SDFObject>(),
+		const std::vector<ComputeRaymarchObject>& objects = std::vector<ComputeRaymarchObject>(),
 		const std::vector<PointLight>& pointLights = std::vector<PointLight>(),
 		const std::vector<DirectionalLight>& directionalLights = std::vector<DirectionalLight>()
 	);
 	~RayMarcher();
 
-	void AddObject(const SDFObject& object);
+	void AddObject(const ComputeRaymarchObject& object);
 	void AddPointLight(const PointLight& pointLight);
 	void AddDirectionalLight(const DirectionalLight& directionalLight);
 
 	const float GetBlendStrength() const { return m_BlendStrength; }
 	void SetBlendStrength(float blendStrength) { m_BlendStrength = glm::clamp(blendStrength, 0.f, 1.f); }
 
-	const std::vector<SDFObject>& GetObjects() const { return m_Objects; }
-	std::vector<SDFObject>& GetObjects() { return m_Objects; }
+	const std::vector<ComputeRaymarchObject>& GetObjects() const { return m_Objects; }
+	std::vector<ComputeRaymarchObject>& GetObjects() { return m_Objects; }
 
 	const std::vector<PointLight>& GetPointLights() const { return m_PointLights; }
 	std::vector<PointLight>& GetPointLights() { return m_PointLights; }
@@ -48,7 +48,7 @@ private:
 
 	float m_BlendStrength = 0;
 
-	std::vector<SDFObject> m_Objects;
+	std::vector<ComputeRaymarchObject> m_Objects;
 	std::vector<PointLight> m_PointLights;
 	std::vector<DirectionalLight> m_DirectionalLights;
 
