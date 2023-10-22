@@ -288,7 +288,7 @@ SceneInfo sceneInfo(vec3 point)
         float localDistance = getShapeDistance(object, point);
         Material localMaterial = object.material;
 
-        uint combineType = 3;
+        uint combineType = 1;
 
         float combineDistance = localDistance;
         if (int(numSDFObjects) - 1 > 0) 
