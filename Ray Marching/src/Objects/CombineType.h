@@ -1,9 +1,8 @@
 #pragma once
 
-enum CombineType
+enum class CombineType
 {
-	None = 0,
-	Blend = 1,
-	Mask = 2,
-	Substract = 3,
+	Blend = 0,
+	Mask = 1,
+	Substract = 2,
 };

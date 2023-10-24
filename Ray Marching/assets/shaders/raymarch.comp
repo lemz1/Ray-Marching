@@ -7,7 +7,7 @@ layout (rgba8, binding = 0) uniform image2D img_output;
 uniform uint width;
 uniform uint height;
 
-uniform uint numSDFObjects;
+uniform uint numRaymarchObjects;
 uniform uint numPointLights;
 uniform uint numDirectionalLights;
 
@@ -29,7 +29,9 @@ struct RaymarchObjectTrash
     float scale[3];
     float diffuseColor[3];
     uint type; // 0 Sphere, 1 Box, 2 Torus
+    uint combineType; // 0 Blend, 1 Mask, 2 Substract
     float blendStrength;
+    uint numChildren;
 };
 
 struct PointLight
@@ -73,12 +75,14 @@ struct Material
     vec3 diffuseColor;
 };
 
-struct ComputeRaymarchObject 
+struct RaymarchObject 
 {
     Transform transform;
     Material material;
     uint type; // 0 Sphere, 1 Box, 2 Torus
+    uint combineType; // 0 Blend, 1 Mask, 2 Substract
     float blendStrength;
+    uint numChildren;
 };
 
 struct Ray 
@@ -102,19 +106,28 @@ struct SceneInfo
     Material material;
 };
 
-ComputeRaymarchObject trashToObject(RaymarchObjectTrash trash) 
+struct ChildSceneInfo 
 {
-    ComputeRaymarchObject object;
+    float distance;
+    Material material;
+    uint indicesToSkip;
+};
+
+RaymarchObject trashToObject(RaymarchObjectTrash trash) 
+{
+    RaymarchObject object;
     object.transform.position = vec3(trash.position[0], trash.position[1], trash.position[2]);
     object.transform.rotation = vec3(trash.rotation[0], trash.rotation[1], trash.rotation[2]);
     object.transform.scale = vec3(trash.scale[0], trash.scale[1], trash.scale[2]);
     object.material.diffuseColor = vec3(trash.diffuseColor[0], trash.diffuseColor[1], trash.diffuseColor[2]);
     object.type = trash.type;
+    object.combineType = trash.combineType;
     object.blendStrength = trash.blendStrength;
+    object.numChildren = trash.numChildren;
     return object;
 }
 
-float sd_Sphere(ComputeRaymarchObject sphere, vec3 point) 
+float sd_Sphere(RaymarchObject sphere, vec3 point) 
 {
     vec3 center = sphere.transform.position;
     float radius = sphere.transform.scale.x;
@@ -122,7 +135,7 @@ float sd_Sphere(ComputeRaymarchObject sphere, vec3 point)
     return length(p) - radius;
 }
 
-float sd_Box(ComputeRaymarchObject box, vec3 point) 
+float sd_Box(RaymarchObject box, vec3 point) 
 {
     vec3 center = box.transform.position;
     vec3 size = box.transform.scale;
@@ -131,7 +144,7 @@ float sd_Box(ComputeRaymarchObject box, vec3 point)
     return min(max(q.x,max(q.y,q.z)),0.0) + length(max(q,0.0));
 }
 
-float sd_Torus(ComputeRaymarchObject torus, vec3 point) 
+float sd_Torus(RaymarchObject torus, vec3 point) 
 {
     vec3 center = torus.transform.position;
     vec2 size = torus.transform.scale.xy;
@@ -140,7 +153,7 @@ float sd_Torus(ComputeRaymarchObject torus, vec3 point)
     return length(q) - size.y;
 }
 
-float getShapeDistance(ComputeRaymarchObject object, vec3 point) 
+float getShapeDistance(RaymarchObject object, vec3 point) 
 {
     float distance = MAX_DISTANCE;
 
@@ -221,16 +234,13 @@ void setCombineDistance(inout float combineDistance, uint combineType)
 {
     switch (combineType) 
     {
-        case 0: // none
-            combineDistance = 0;
-            break;
-        case 1: // blending 
+        case 0: // blending 
             // do nothing
             break;
-        case 2: // intersection
+        case 1: // intersection
             combineDistance = MAX_DISTANCE;
             break;
-        case 3: // substraction
+        case 2: // substraction
             combineDistance = 0;
             break;
     }
@@ -245,19 +255,12 @@ void combine(inout float combineDistance, inout Material combineMaterial,
     SceneInfo sceneInfo;
     switch (combineType) 
     {
-        case 0: // none
-            if (distanceB < distanceA) 
-            {
-                combineDistance = distanceB;
-                combineMaterial = materialB;
-            }
-            break;
-        case 1: // blending
+        case 0: // blending
             sceneInfo = blend(combineDistance, distanceB, combineMaterial, materialB, blendStrength);
             combineDistance = sceneInfo.distance;
             combineMaterial = sceneInfo.material;
             break;
-        case 2: // intersection
+        case 1: // intersection
             sceneInfo = intersect(distanceA, distanceB, materialA, materialB);
             if (sceneInfo.distance < combineDistance) 
             {
@@ -265,7 +268,7 @@ void combine(inout float combineDistance, inout Material combineMaterial,
                 combineMaterial = sceneInfo.material;
             }
             break;
-        case 3: // susbstraction
+        case 2: // susbstraction
             sceneInfo = substract(distanceA, distanceB, materialA, materialB);
             if (sceneInfo.distance > combineDistance) 
             {
@@ -276,37 +279,69 @@ void combine(inout float combineDistance, inout Material combineMaterial,
     }
 }
 
+uint childSceneInfo(
+    inout float combineDistance, inout Material combineMaterial,
+    float parentDistance, RaymarchObject parent,
+    uint childIndex, RaymarchObject child,
+    vec3 point
+) 
+{
+    SceneInfo sceneInfo;
+    sceneInfo.distance = getShapeDistance(child, point);
+    sceneInfo.material = child.material;
+
+    uint indicesToSkip = 1 + child.numChildren;
+
+    /*
+    i wanted to have recursion, but i forgot that glsl doesnt support recursion
+    for (uint i = childIndex + 1; i < childIndex + 1 + child.numChildren; i++) 
+    {
+        RaymarchObject childOfChild = trashToObject(raymarchObjects[i]);
+        ChildSceneInfo childInfo = childSceneInfo(combineDistance, combineMaterial, sceneInfo.distance, child, i, childOfChild, point);
+        sceneInfo.distance = childInfo.distance;
+        sceneInfo.material = childInfo.material;
+        indicesToSkip += childInfo.indicesToSkip;
+    }
+    */
+    
+    //setCombineDistance(combineDistance, parent.combineType);
+    
+    combine(combineDistance, combineMaterial, parentDistance, sceneInfo.distance, parent.material, sceneInfo.material, parent.combineType, child.blendStrength);
+    
+    return indicesToSkip;
+}
+
 SceneInfo sceneInfo(vec3 point) 
 {
     SceneInfo sceneInfo;
     sceneInfo.distance = MAX_DISTANCE;
-    sceneInfo.material = Material(vec3(0.1));
+    sceneInfo.material;
 
-    for (int i = 0; i < numSDFObjects; i++) 
+    for (uint i = 0; i < numRaymarchObjects; i++) 
     {
-        ComputeRaymarchObject object = trashToObject(raymarchObjects[i]);
+        RaymarchObject object = trashToObject(raymarchObjects[i]);
         float localDistance = getShapeDistance(object, point);
         Material localMaterial = object.material;
 
-        uint combineType = 1;
+        uint indicesToSkip = 0;
 
         float combineDistance = localDistance;
-        if (int(numSDFObjects) - 1 > 0) 
+        if (object.numChildren > 0) 
         {
-            setCombineDistance(combineDistance, combineType);
+            setCombineDistance(combineDistance, object.combineType);
         }
         Material combineMaterial = localMaterial;
-        for (int j = i + 1; j < numSDFObjects; j++) 
+        
+        for (uint j = i + 1; j < i + 1 + object.numChildren; j++) 
         {
-            ComputeRaymarchObject otherObject = trashToObject(raymarchObjects[j]);
-            float otherDistance = getShapeDistance(otherObject, point);
-            Material otherMaterial = otherObject.material;
+            RaymarchObject child = trashToObject(raymarchObjects[j]);
 
-            combine(combineDistance, combineMaterial, localDistance, otherDistance, localMaterial, otherMaterial, combineType, otherObject.blendStrength);
+            indicesToSkip += childSceneInfo(combineDistance, combineMaterial, localDistance, object, j, child, point);
         }
+
         localDistance = combineDistance;
         localMaterial = combineMaterial;
-        i += int(numSDFObjects);
+        i += indicesToSkip;
 
         if (localDistance < sceneInfo.distance) 
         {
@@ -406,8 +441,6 @@ void main()
 
     if (!hitInfo.hit) // return early if it didnt hit
     {
-        vec4 pixel = vec4(0.1, 0.1, 0.1, 1.0);
-        imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);
         return;
     }
     

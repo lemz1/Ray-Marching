@@ -22,5 +22,5 @@ private:
 
 	CameraController m_CameraController;
 
-	RayMarcher* m_RayMarcher;
+	RayMarcher* m_RayMarcher = nullptr;
 };

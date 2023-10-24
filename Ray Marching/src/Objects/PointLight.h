@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-enum LightFalloff
+enum class LightFalloff
 {
 	None = 0,
 	Linear = 1,

@@ -20,9 +20,25 @@
 struct RaymarchObject
 {
 public:
-	static RaymarchObject* Create(const ComputeRaymarchObject& object, const std::vector<RaymarchObject> children, const CombineType& combineType = CombineType::None);
+	static RaymarchObject* Create(
+		const Transform& transform,
+		const Material& material,
+		const RaymarchObjectType& type,
+		float blendStrength,
+		const CombineType& combineType = CombineType::Blend,
+		const std::vector<RaymarchObject*>& children = std::vector<RaymarchObject*>()
+	);
+
+	static RaymarchObject* Create(
+		const ComputeRaymarchObject& object,
+		const CombineType& combineType = CombineType::Blend,
+		const std::vector<RaymarchObject*>& children = std::vector<RaymarchObject*>()
+	);
+
+	void AddChild(RaymarchObject* object);
+	void SetChildren(const std::vector<RaymarchObject*>& objects);
 public:
 	ComputeRaymarchObject object;
-	std::vector<RaymarchObject> children;
-	CombineType combineType = CombineType::None;
+	std::vector<RaymarchObject*> children;
+	CombineType combineType = CombineType::Blend;
 };

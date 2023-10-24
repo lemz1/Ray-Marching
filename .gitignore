@@ -5,4 +5,9 @@ bin-int
 *.vcxproj.user
 *.vcxproj.filters
 *.sln
+
+## visual studio
 .vs
+
+## jetbrains rider
+.idea

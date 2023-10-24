@@ -7,7 +7,7 @@
 RayMarcher* RayMarcher::Create(
 	std::shared_ptr<Shader> computeShader,
 	std::shared_ptr<Camera> camera,
-	const std::vector<ComputeRaymarchObject>& objects, 
+	const std::vector<RaymarchObject*>& objects, 
 	const std::vector<PointLight>& pointLights, 
 	const std::vector<DirectionalLight>& directionalLights
 )
@@ -29,10 +29,27 @@ RayMarcher::~RayMarcher()
 	DeleteBuffers();
 }
 
-void RayMarcher::AddObject(const ComputeRaymarchObject& object)
+void RayMarcher::AddChildrenRecursively(const RaymarchObject* object)
+{
+	for (auto child : object->children)
+	{
+		m_ComputeObjects.push_back(child->object);
+		// if the child also has children to this function again
+		if (child->children.size() > 0)
+		{
+			AddChildrenRecursively(child);
+		}
+	}
+}
+
+void RayMarcher::AddObject(RaymarchObject* object)
 {
 	m_Objects.push_back(object);
-	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(ComputeRaymarchObject));
+
+	m_ComputeObjects.push_back(object->object);
+	AddChildrenRecursively(object);
+
+	m_ObjectsBuffer->SetData(m_ComputeObjects.data(), m_ComputeObjects.size() * sizeof(ComputeRaymarchObject));
 }
 
 void RayMarcher::AddPointLight(const PointLight& pointLight)
@@ -58,7 +75,7 @@ void RayMarcher::Render()
 	glUniform1ui(glGetUniformLocation(computeShaderID, "width"), spec.width);
 	glUniform1ui(glGetUniformLocation(computeShaderID, "height"), spec.height);
 
-	glUniform1ui(glGetUniformLocation(computeShaderID, "numSDFObjects"), static_cast<GLuint>(m_Objects.size()));
+	glUniform1ui(glGetUniformLocation(computeShaderID, "numRaymarchObjects"), static_cast<GLuint>(m_ComputeObjects.size()));
 	glUniform1ui(glGetUniformLocation(computeShaderID, "numPointLights"), static_cast<GLuint>(m_PointLights.size()));
 	glUniform1ui(glGetUniformLocation(computeShaderID, "numDirectionalLights"), static_cast<GLuint>(m_DirectionalLights.size()));
 
@@ -71,7 +88,7 @@ void RayMarcher::Render()
 	glUniformMatrix4fv(glGetUniformLocation(computeShaderID, "inverseProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(m_Camera->GetInverseProjectionMatrix()));
 	glUniformMatrix4fv(glGetUniformLocation(computeShaderID, "inverseViewMatrix"), 1, GL_FALSE, glm::value_ptr(m_Camera->GetInverseViewMatrix()));
 
-	m_ObjectsBuffer->SetData(m_Objects.data(), m_Objects.size() * sizeof(ComputeRaymarchObject));
+	m_ObjectsBuffer->SetData(m_ComputeObjects.data(), m_ComputeObjects.size() * sizeof(ComputeRaymarchObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
 	m_DirectionalLightsBuffer->SetData(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight));
 
