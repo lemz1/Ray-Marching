@@ -5,8 +5,8 @@
 #include "../Core/Application.h"
 
 RayMarcher* RayMarcher::Create(
-	std::shared_ptr<Shader> computeShader,
-	std::shared_ptr<Camera> camera,
+	const std::shared_ptr<Shader>& computeShader,
+	const std::shared_ptr<Camera>& camera,
 	const std::vector<RaymarchObject*>& objects, 
 	const std::vector<PointLight>& pointLights, 
 	const std::vector<DirectionalLight>& directionalLights
@@ -91,7 +91,7 @@ void RayMarcher::Render()
 	m_ObjectsBuffer->SetData(m_ComputeObjects.data(), m_ComputeObjects.size() * sizeof(ComputeRaymarchObject));
 	m_PointLightsBuffer->SetData(m_PointLights.data(), m_PointLights.size() * sizeof(PointLight));
 	m_DirectionalLightsBuffer->SetData(m_DirectionalLights.data(), m_DirectionalLights.size() * sizeof(DirectionalLight));
-
+	
 	m_ObjectsBuffer->BindBufferBase();
 	m_PointLightsBuffer->BindBufferBase();
 	m_DirectionalLightsBuffer->BindBufferBase();

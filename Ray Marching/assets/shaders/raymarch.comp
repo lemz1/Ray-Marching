@@ -34,18 +34,17 @@ struct RaymarchObjectTrash
     uint numChildren;
 };
 
-struct PointLight
+struct PointLightTrash
 {
-    vec3 position;
-    vec3 color;
-    uint lightFalloffType; // 0 None, 1 Linear, 2 Quadractic
+    float position[3];
+    float color[3];
     float intensity;
 };
 
-struct DirectionalLight 
+struct DirectionalLightTrash
 {
-    vec3 direction;
-    vec3 color;
+    float direction[3];
+    float color[3];
 };
 
 layout(std430, binding = 1) buffer RaymarchObjectsBuffer
@@ -55,12 +54,12 @@ layout(std430, binding = 1) buffer RaymarchObjectsBuffer
 
 layout(std430, binding = 2) buffer PointLightsBuffer
 {
-    PointLight pointLights[];
+    PointLightTrash pointLights[];
 };
 
 layout(std430, binding = 3) buffer DirectionalLightsBuffer
 {
-    DirectionalLight directionalLights[];
+    DirectionalLightTrash directionalLights[];
 };
 
 struct Transform 
@@ -83,6 +82,19 @@ struct RaymarchObject
     uint combineType; // 0 Blend, 1 Mask, 2 Substract
     float blendStrength;
     uint numChildren;
+};
+
+struct PointLight
+{
+    vec3 position;
+    vec3 color;
+    float intensity;
+};
+
+struct DirectionalLight
+{
+    vec3 direction;
+    vec3 color;
 };
 
 struct Ray 
@@ -125,6 +137,23 @@ RaymarchObject trashToObject(RaymarchObjectTrash trash)
     object.blendStrength = trash.blendStrength;
     object.numChildren = trash.numChildren;
     return object;
+}
+
+PointLight trashToPointLight(PointLightTrash trash)
+{
+    PointLight light;
+    light.position = vec3(trash.position[0], trash.position[1], trash.position[2]);
+    light.color = vec3(trash.color[0], trash.color[1], trash.color[2]);
+    light.intensity = trash.intensity;
+    return light;
+}
+
+DirectionalLight trashToDirectionalLight(DirectionalLightTrash trash)
+{
+    DirectionalLight light;
+    light.direction = vec3(trash.direction[0], trash.direction[1], trash.direction[2]);
+    light.color = vec3(trash.color[0], trash.color[1], trash.color[2]);
+    return light;
 }
 
 float sd_Sphere(RaymarchObject sphere, vec3 point) 
@@ -397,7 +426,20 @@ vec3 approximateNormal(vec3 point)
     return normalize(vec3(x, y, z));
 }
 
-vec3 calculateLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Material material) 
+vec3 calculatePointLighting(PointLight light, vec3 surfacePoint, vec3 normal, vec3 viewDir, Material material)
+{
+    vec3 lightDir = normalize(light.position - surfacePoint);
+    float dotNL = dot(normal, lightDir);
+    vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color * light.intensity;
+
+    float ambientStrength = 0.2;
+    vec3 ambient = ambientStrength * material.diffuseColor;
+
+    return ambient + diffuse;
+}
+
+
+vec3 calculateDirectionalLighting(DirectionalLight light, vec3 normal, vec3 viewDir, Material material) 
 {
     float dotNL = dot(normal, light.direction);
     vec3 diffuse = material.diffuseColor * max(dotNL, 0.0) * light.color;
@@ -432,22 +474,30 @@ void main()
     // theres probably a more sophisticated way
     ray.origin.z *= -1;
     ray.direction.z *= -1;
-
-    DirectionalLight light;
-    light.direction = vec3(1, 1, 0);
-    light.color = vec3(1, 1, 1); 
-
+    
     HitInfo hitInfo = rayMarch(ray);
 
     if (!hitInfo.hit) // return early if it didnt hit
     {
         return;
     }
-    
-    vec3 normal = approximateNormal(hitInfo.surfacePoint - (ray.direction * EPSILON));
 
+    vec3 lighting = vec3(0.0);
+    vec3 normal = approximateNormal(hitInfo.surfacePoint - (ray.direction * EPSILON));
     vec3 viewDir = normalize(cameraOrigin - hitInfo.surfacePoint);
-    vec3 lighting = calculateLighting(light, normal, viewDir, hitInfo.material);
+
+    for (uint i = 0; i < numDirectionalLights; i++)
+    {
+        DirectionalLight dLight = trashToDirectionalLight(directionalLights[i]);
+        lighting += calculateDirectionalLighting(dLight, normal, viewDir, hitInfo.material);
+    }
+
+    for (uint i = 0; i < numPointLights; i++)
+    {
+        PointLight pLight = trashToPointLight(pointLights[i]);
+        lighting += calculatePointLighting(pLight, hitInfo.surfacePoint, normal, viewDir, hitInfo.material);
+    }
+
     vec4 pixel = vec4(lighting, 1.0);
 
     imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), pixel);

@@ -9,6 +9,7 @@
 #include "../../Core/InputHandler.h"
 #include "../../Debug/OpenGLDebug.h"
 #include "../../Objects/ComputeRaymarchObject.h"
+#include "GLFW/glfw3native.h"
 
 #define BindEvent(eventCallback) std::bind(&RayMarchingScene::eventCallback, this, std::placeholders::_1)
 
@@ -19,7 +20,7 @@ void RayMarchingScene::OnCreate()
 	EventHandler::AddEventListener(new WindowResizeEventListener(BindEvent(OnWindowResize)));
 	EventHandler::AddEventListener(new KeyboardEventListener(BindEvent(OnKeyboard)));
 
-	const std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 1, 3), glm::vec3(0, 0, -1)));
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>(Transform(glm::vec3(0, 1, 3), glm::vec3(0, 0, -1)));
 
 	m_CameraController = CameraController(camera);
 
@@ -33,6 +34,9 @@ void RayMarchingScene::OnCreate()
 	
 	object1->AddChild(child1);
 	object1->AddChild(child2);
+
+	PointLight light = PointLight(glm::vec3(0, 2, 0), glm::vec3(1), 2);
+	m_RayMarcher->AddPointLight(light);
 
 	m_RayMarcher->AddObject(object1);
 }
@@ -64,6 +68,7 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 
 	ImGui::Begin("Objects");
 	static int s_SelectedObjectIndex = -1;
+	static int s_SelectedLightIndex = -1;
 
 	int i = 0;
 	for (auto& object : m_RayMarcher->GetObjects())
@@ -72,6 +77,7 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 		if (ImGui::Selectable(objectName.c_str()))
 		{
 			s_SelectedObjectIndex = i;
+			s_SelectedLightIndex = -1;
 		}
 
 		for (auto& child : object->children)
@@ -81,10 +87,34 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 			if (ImGui::Selectable(childName.c_str()))
 			{
 				s_SelectedObjectIndex = i;
+				s_SelectedLightIndex = -1;
 			}
 		}
 
 		i++;
+	}
+
+	int lightIndex = 0;
+	for (auto& light : m_RayMarcher->GetPointLights())
+	{
+		std::string lightName = "Point Light " + std::to_string(lightIndex);
+		if (ImGui::Selectable(lightName.c_str()))
+		{
+			s_SelectedObjectIndex = -1;
+			s_SelectedLightIndex = lightIndex;
+		}
+		lightIndex++;
+	}
+
+	for (auto& light : m_RayMarcher->GetDirectionalLights())
+	{
+		std::string lightName = "Directional Light " + std::to_string(lightIndex);
+		if (ImGui::Selectable(lightName.c_str()))
+		{
+			s_SelectedObjectIndex = -1;
+			s_SelectedLightIndex = lightIndex;
+		}
+		lightIndex++;
 	}
 	ImGui::End();
 
@@ -113,6 +143,23 @@ void RayMarchingScene::OnImGuiUpdate(double deltaTime)
 		}
 		
 		ImGui::ColorPicker3("Color", glm::value_ptr(object->material.diffuseColor));
+	}
+
+	if (s_SelectedLightIndex != -1)
+	{
+		if (s_SelectedLightIndex < m_RayMarcher->GetPointLights().size())
+		{
+			PointLight& light = m_RayMarcher->GetPointLights().at(s_SelectedLightIndex);
+			ImGui::DragFloat3("Position", glm::value_ptr(light.position), 0.025f);
+			ImGui::DragFloat("Intensity", &light.intensity, 0.01f, 0.f, FLT_MAX);
+			ImGui::ColorPicker3("Color", glm::value_ptr(light.color));
+		}
+		else
+		{
+			DirectionalLight& light = m_RayMarcher->GetDirectionalLights().at(s_SelectedLightIndex - m_RayMarcher->GetPointLights().size());
+			ImGui::DragFloat3("Direction", glm::value_ptr(light.direction), 0.01f);
+			ImGui::ColorPicker3("Color", glm::value_ptr(light.color));
+		}
 	}
 	ImGui::End();
 }

@@ -14,8 +14,8 @@ class RayMarcher
 {
 public:
 	static RayMarcher* Create(
-		std::shared_ptr<Shader> computeShader,
-		std::shared_ptr<Camera> camera,
+		const std::shared_ptr<Shader>& computeShader,
+		const std::shared_ptr<Camera>& camera,
 		const std::vector<RaymarchObject*>& objects = std::vector<RaymarchObject*>(),
 		const std::vector<PointLight>& pointLights = std::vector<PointLight>(),
 		const std::vector<DirectionalLight>& directionalLights = std::vector<DirectionalLight>()
