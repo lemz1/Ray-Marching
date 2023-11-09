@@ -91,6 +91,7 @@ FrameBuffer* InitializeViewportFrameBuffer()
 
 void CreateDockSpace(ImGuiIO& io)
 {
+    // Im pretty sure this approach is bad, since you can't move the ImGui windows outside the GLFWwindow
     // Create a full-screen ImGui window
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y));
